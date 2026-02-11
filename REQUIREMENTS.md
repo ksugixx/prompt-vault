@@ -66,17 +66,17 @@ AIツール別にプロンプトを整理・保存・検索できる。
 ## データモデル
 
 ### User
-\\\	ypescript
+```typescript
 {
   id: string;           // UUID v4
   username: string;     // ユニーク、3-20文字
   passwordHash: string; // bcryptでハッシュ化
   createdAt: string;    // ISO 8601形式
 }
-\\\
+```
 
 ### Prompt
-\\\	ypescript
+```typescript
 {
   id: string;           // UUID v4
   userId: string;       // 所有者のUser ID
@@ -88,7 +88,7 @@ AIツール別にプロンプトを整理・保存・検索できる。
   createdAt: string;    // ISO 8601形式
   updatedAt: string;    // ISO 8601形式
 }
-\\\
+```
 
 ## API仕様
 
@@ -98,54 +98,54 @@ AIツール別にプロンプトを整理・保存・検索できる。
 ユーザー登録
 
 **リクエスト:**
-\\\json
+```json
 {
   "username": "user123",
   "password": "securePassword123"
 }
-\\\
+```
 
 **レスポンス（成功 201）:**
-\\\json
+```json
 {
   "message": "User registered successfully",
   "userId": "uuid-here"
 }
-\\\
+```
 
 **エラー（400）:**
-\\\json
+```json
 {
   "error": "Username already exists"
 }
-\\\
+```
 
 #### POST /api/login
 ログイン
 
 **リクエスト:**
-\\\json
+```json
 {
   "username": "user123",
   "password": "securePassword123"
 }
-\\\
+```
 
 **レスポンス（成功 200）:**
-\\\json
+```json
 {
   "token": "jwt-token-here",
   "userId": "uuid-here",
   "username": "user123"
 }
-\\\
+```
 
 **エラー（401）:**
-\\\json
+```json
 {
   "error": "Invalid credentials"
 }
-\\\
+```
 
 ### プロンプト管理エンドポイント（要JWT認証）
 
@@ -153,18 +153,18 @@ AIツール別にプロンプトを整理・保存・検索できる。
 プロンプト一覧取得
 
 **クエリパラメータ:**
-- \search\: 全文検索キーワード（任意）
-- \category\: カテゴリフィルタ（任意）
-- \	ag\: タグフィルタ（任意）
-- \iTool\: AIツールフィルタ（任意）
+- `search`: 全文検索キーワード（任意）
+- `category`: カテゴリフィルタ（任意）
+- `tag`: タグフィルタ（任意）
+- `aiTool`: AIツールフィルタ（任意）
 
 **リクエストヘッダー:**
-\\\
+```
 Authorization: Bearer <jwt-token>
-\\\
+```
 
 **レスポンス（200）:**
-\\\json
+```json
 {
   "prompts": [
     {
@@ -180,18 +180,18 @@ Authorization: Bearer <jwt-token>
     }
   ]
 }
-\\\
+```
 
 #### POST /api/prompts
 プロンプト作成
 
 **リクエストヘッダー:**
-\\\
+```
 Authorization: Bearer <jwt-token>
-\\\
+```
 
 **リクエスト:**
-\\\json
+```json
 {
   "title": "新しいプロンプト",
   "content": "プロンプトの内容...",
@@ -199,26 +199,26 @@ Authorization: Bearer <jwt-token>
   "tags": ["ブログ", "SEO"],
   "aiTool": "ChatGPT"
 }
-\\\
+```
 
 **レスポンス（201）:**
-\\\json
+```json
 {
   "id": "new-uuid",
   "message": "Prompt created successfully"
 }
-\\\
+```
 
 #### PUT /api/prompts/{id}
 プロンプト更新
 
 **リクエストヘッダー:**
-\\\
+```
 Authorization: Bearer <jwt-token>
-\\\
+```
 
 **リクエスト:**
-\\\json
+```json
 {
   "title": "更新されたタイトル",
   "content": "更新された内容...",
@@ -226,36 +226,36 @@ Authorization: Bearer <jwt-token>
   "tags": ["データ分析"],
   "aiTool": "Claude"
 }
-\\\
+```
 
 **レスポンス（200）:**
-\\\json
+```json
 {
   "message": "Prompt updated successfully"
 }
-\\\
+```
 
 **エラー（404）:**
-\\\json
+```json
 {
   "error": "Prompt not found"
 }
-\\\
+```
 
 #### DELETE /api/prompts/{id}
 プロンプト削除
 
 **リクエストヘッダー:**
-\\\
+```
 Authorization: Bearer <jwt-token>
-\\\
+```
 
 **レスポンス（200）:**
-\\\json
+```json
 {
   "message": "Prompt deleted successfully"
 }
-\\\
+```
 
 ## UI/UX要件
 
@@ -358,7 +358,7 @@ Authorization: Bearer <jwt-token>
 3. 認証ユーティリティ（utils/auth.ts, utils/password.ts）
 4. 認証API（Register, Login）
 5. プロンプトCRUD API（GetPrompts, CreatePrompt, UpdatePrompt, DeletePrompt）
-6. ローカルテスト（unc start）
+6. ローカルテスト（func start）
 
 ### Phase 2: フロントエンド実装
 1. API クライアント（api/client.ts）
@@ -367,8 +367,7 @@ Authorization: Bearer <jwt-token>
 4. プロンプト作成/編集ページ（PromptForm）
 5. 共通コンポーネント（PromptCard, Header, Filterなど）
 6. ルーティング設定（App.tsx）
-7. ローカルテスト（
-pm run dev）
+7. ローカルテスト（npm run dev）
 
 ### Phase 3: 統合テスト
 1. フロントエンド + バックエンド連携確認
