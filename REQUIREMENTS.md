@@ -50,16 +50,18 @@ AIツール別にプロンプトを整理・保存・検索できる。
 - Node.js 18+
 - JWT認証
 - bcryptjs（パスワードハッシュ化）
+- MongoDB（データベース）
 
 ### Database
-- Azure Cosmos DB (NoSQL)
-- コンテナ構成：
-  - **Users**（パーティションキー: /id）
-  - **Prompts**（パーティションキー: /userId）
+- MongoDB (Atlas/ローカル)
+- コレクション構成：
+  - **users**
+  - **prompts**
 
-### Infrastructure & DevOps
+## Infrastructure & DevOps
 - Azure Static Web Apps（Frontend ホスティング）
 - Azure Functions（Backend API）
+- MongoDB Atlas（本番DB）
 - GitHub（ソースコード管理）
 - GitHub Actions（CI/CD）
 
@@ -68,7 +70,7 @@ AIツール別にプロンプトを整理・保存・検索できる。
 ### User
 ```typescript
 {
-  id: string;           // UUID v4
+  _id: ObjectId;        // MongoDB ObjectId
   username: string;     // ユニーク、3-20文字
   passwordHash: string; // bcryptでハッシュ化
   createdAt: string;    // ISO 8601形式
@@ -78,8 +80,8 @@ AIツール別にプロンプトを整理・保存・検索できる。
 ### Prompt
 ```typescript
 {
-  id: string;           // UUID v4
-  userId: string;       // 所有者のUser ID
+  _id: ObjectId;        // MongoDB ObjectId
+  userId: ObjectId;     // 所有者のUser ID
   title: string;        // 1-200文字
   content: string;      // マークダウン対応、最大10,000文字
   category: string;     // 例: "コーディング", "ライティング", "分析", "翻訳", "その他"
@@ -109,7 +111,7 @@ AIツール別にプロンプトを整理・保存・検索できる。
 ```json
 {
   "message": "User registered successfully",
-  "userId": "uuid-here"
+  "userId": "mongo-objectid-here"
 }
 ```
 
@@ -135,7 +137,7 @@ AIツール別にプロンプトを整理・保存・検索できる。
 ```json
 {
   "token": "jwt-token-here",
-  "userId": "uuid-here",
+  "userId": "mongo-objectid-here",
   "username": "user123"
 }
 ```
@@ -168,8 +170,8 @@ Authorization: Bearer <jwt-token>
 {
   "prompts": [
     {
-      "id": "uuid",
-      "userId": "user-uuid",
+      "_id": "mongo-objectid",
+      "userId": "user-objectid",
       "title": "Python デバッグ用プロンプト",
       "content": "# デバッグ手順...",
       "category": "コーディング",
@@ -204,7 +206,7 @@ Authorization: Bearer <jwt-token>
 **レスポンス（201）:**
 ```json
 {
-  "id": "new-uuid",
+  "id": "new-mongo-objectid",
   "message": "Prompt created successfully"
 }
 ```
@@ -354,7 +356,7 @@ Authorization: Bearer <jwt-token>
 
 ### Phase 1: バックエンド実装
 1. 型定義（models/types.ts）
-2. Cosmos DB接続（utils/cosmos.ts）
+2. MongoDB接続（utils/mongodb.ts）
 3. 認証ユーティリティ（utils/auth.ts, utils/password.ts）
 4. 認証API（Register, Login）
 5. プロンプトCRUD API（GetPrompts, CreatePrompt, UpdatePrompt, DeletePrompt）
@@ -388,6 +390,7 @@ Authorization: Bearer <jwt-token>
 - Git
 - Azure CLI
 - Azure Functions Core Tools
+- MongoDB（ローカル or Atlas）
 - Claude Code
 
 ### 推奨エディタ

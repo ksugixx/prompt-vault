@@ -18,8 +18,8 @@
 | Frontend | React 18 + TypeScript, Vite, React Router v6, TanStack Query, Tailwind CSS, Axios |
 | Backend | Azure Functions v4 (TypeScript), Node.js 18+ |
 | 認証 | JWT (jsonwebtoken), bcryptjs |
-| Database | Azure Cosmos DB (NoSQL) |
-| Infrastructure | Azure Static Web Apps, GitHub Actions |
+| Database | MongoDB (Atlas/ローカル) |
+| Infrastructure | Azure Static Web Apps, MongoDB Atlas, GitHub Actions |
 
 ## プロジェクト構造
 
@@ -37,7 +37,7 @@ prompt-vault/
 │   ├── src/
 │   │   ├── functions/      # Register, Login, GetPrompts, CreatePrompt, UpdatePrompt, DeletePrompt
 │   │   ├── models/         # データモデル型定義
-│   │   └── utils/          # Cosmos DB接続, JWT認証, パスワードハッシュ
+│   │   └── utils/          # MongoDB接続, JWT認証, パスワードハッシュ
 │   └── host.json
 │
 ├── REQUIREMENTS.md          # 要求仕様書
@@ -50,7 +50,7 @@ prompt-vault/
 
 - Node.js 18+
 - Azure Functions Core Tools v4
-- Azure Cosmos DB アカウント
+- MongoDB（ローカル or Atlas）
 
 ### バックエンド
 
@@ -59,17 +59,15 @@ cd backend
 npm install
 ```
 
-`backend/local.settings.json` を作成し、Cosmos DBの接続情報を設定：
+`backend/local.settings.json` を作成し、MongoDBの接続情報を設定：
 
 ```json
 {
   "IsEncrypted": false,
   "Values": {
     "FUNCTIONS_WORKER_RUNTIME": "node",
-    "AzureWebJobsStorage": "",
-    "COSMOS_ENDPOINT": "https://your-account.documents.azure.com:443/",
-    "COSMOS_KEY": "your-cosmos-key",
-    "COSMOS_DATABASE": "PromptVaultDB",
+    "MONGODB_URI": "mongodb+srv://<user>:<password>@cluster0.xxxxx.mongodb.net/?retryWrites=true&w=majority",
+    "MONGODB_DATABASE": "PromptVaultDB",
     "JWT_SECRET": "your-secret-key"
   },
   "Host": {

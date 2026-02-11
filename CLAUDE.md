@@ -36,7 +36,7 @@ prompt-vault/
 │   │   │   ├── UpdatePrompt/
 │   │   │   └── DeletePrompt/
 │   │   ├── models/       # データモデル・型定義
-│   │   └── utils/        # ユーティリティ（DB接続、認証など）
+│   │   └── utils/        # ユーティリティ（MongoDB接続、認証など）
 │   ├── host.json
 │   ├── local.settings.json  # ローカル環境変数（gitignore対象）
 │   └── package.json
@@ -141,9 +141,9 @@ VITE_API_BASE_URL=http://localhost:7071/api
 4. バックエンドがトークンを検証 → userIdを取得 → リクエスト処理
 
 ### MongoDB インデックス設計
-- **Users**: `{ username: 1 }` unique - ユーザー名の一意性保証・検索用
-- **Prompts**: `{ userId: 1, createdAt: -1 }` - ユーザーごとの一覧取得用
-- **Prompts**: `{ id: 1, userId: 1 }` - 更新・削除の所有権チェック用
+- **users**: `{ username: 1 }` unique - ユーザー名の一意性保証・検索用
+- **prompts**: `{ userId: 1, createdAt: -1 }` - ユーザーごとの一覧取得用
+- **prompts**: `{ _id: 1, userId: 1 }` - 更新・削除の所有権チェック用
 
 ### CORS設定
 - **開発環境**: すべてのオリジンを許可 (*)
