@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { PromptFilters, CATEGORIES, AI_TOOLS } from '../types'
+import type { PromptFilters } from '../types'
+import { CATEGORIES, AI_TOOLS } from '../types'
 
 interface SearchFilterProps {
   filters: PromptFilters

@@ -3,8 +3,9 @@
  * バックエンドとの通信を一元管理
  */
 
-import axios, { AxiosInstance } from 'axios';
-import {
+import axios from 'axios';
+import type { AxiosInstance } from 'axios';
+import type {
   LoginRequest,
   LoginResponse,
   RegisterRequest,

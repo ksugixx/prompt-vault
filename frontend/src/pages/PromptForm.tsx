@@ -1,8 +1,8 @@
-import { useState, FormEvent, useEffect } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useState, type FormEvent, useEffect } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { createPrompt, updatePrompt } from '../api/client'
-import { Prompt, PromptFormData, CATEGORIES, AI_TOOLS } from '../types'
+import type { Prompt, PromptFormData } from '../types'
+import { CATEGORIES, AI_TOOLS } from '../types'
 
 interface PromptFormProps {
   editPrompt?: Prompt | null
