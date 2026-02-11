@@ -53,7 +53,7 @@ prompt-vault/
 
 ### Phase 1: バックエンド基盤（最優先）
 1. **型定義** - `backend/src/models/types.ts`
-2. **Cosmos DB接続** - `backend/src/utils/cosmos.ts`
+2. **MongoDB接続** - `backend/src/utils/mongodb.ts`
 3. **認証ユーティリティ** - `backend/src/utils/auth.ts`, `backend/src/utils/password.ts`
 
 ### Phase 2: 認証API
@@ -116,9 +116,8 @@ prompt-vault/
   "IsEncrypted": false,
   "Values": {
     "FUNCTIONS_WORKER_RUNTIME": "node",
-    "COSMOS_ENDPOINT": "https://cosmos-promptvault-XXXX.documents.azure.com:443/",
-    "COSMOS_KEY": "your-cosmos-key",
-    "COSMOS_DATABASE": "PromptVaultDB",
+    "MONGODB_URI": "mongodb+srv://<user>:<password>@cluster0.xxxxx.mongodb.net/?retryWrites=true&w=majority",
+    "MONGODB_DATABASE": "PromptVaultDB",
     "JWT_SECRET": "your-super-secret-jwt-key-change-in-production"
   },
   "Host": {
@@ -141,9 +140,10 @@ VITE_API_BASE_URL=http://localhost:7071/api
 3. 以降のAPIリクエストで `Authorization: Bearer <token>` ヘッダーを付与
 4. バックエンドがトークンを検証 → userIdを取得 → リクエスト処理
 
-### Cosmos DB パーティションキー設計
-- **Users**: `/id` - ユーザーIDでパーティション分割
-- **Prompts**: `/userId` - ユーザーごとにデータを分離
+### MongoDB インデックス設計
+- **Users**: `{ username: 1 }` unique - ユーザー名の一意性保証・検索用
+- **Prompts**: `{ userId: 1, createdAt: -1 }` - ユーザーごとの一覧取得用
+- **Prompts**: `{ id: 1, userId: 1 }` - 更新・削除の所有権チェック用
 
 ### CORS設定
 - **開発環境**: すべてのオリジンを許可 (*)
@@ -190,9 +190,9 @@ curl http://localhost:7071/api/prompts \
 
 ### よくあるエラーと解決方法
 
-#### 1. Cosmos DB接続エラー
-- `local.settings.json` の `COSMOS_ENDPOINT` と `COSMOS_KEY` を確認
-- Azureポータルで接続文字列を再確認
+#### 1. MongoDB接続エラー
+- `local.settings.json` の `MONGODB_URI` を確認
+- MongoDB Atlasのダッシュボードで接続文字列・IPホワイトリストを再確認
 
 #### 2. CORS エラー
 - `local.settings.json` の `Host.CORS` 設定を確認
@@ -270,19 +270,19 @@ REQUIREMENTS.mdに記載されているUser、Prompt、AuthTokenの型定義を�
 - **入力値の検証を徹底** - SQLインジェクション、XSS対策
 
 ### パフォーマンス
-- **Cosmos DBクエリの最適化** - パーティションキーを活用
+- **MongoDBクエリの最適化** - インデックスを活用
 - **不要な re-render を避ける** - React.memo や useMemo を適切に使用
 - **画像・アセットの最適化**
 
 ### コスト管理
-- **Cosmos DB スループット** - 開発中は最小限（400 RU/s）
+- **MongoDB Atlas** - 開発中は無料枠（M0）を活用
 - **Azure Functions** - 不要な関数は削除
 - **ログレベル** - 本番環境では `INFO` 以上
 
 ## 参考リンク
 
 - https://learn.microsoft.com/azure/azure-functions/functions-reference-node
-- https://learn.microsoft.com/azure/cosmos-db/
+- https://www.mongodb.com/docs/drivers/node/current/
 - https://reactrouter.com/
 - https://tanstack.com/query/latest
 - https://tailwindcss.com/

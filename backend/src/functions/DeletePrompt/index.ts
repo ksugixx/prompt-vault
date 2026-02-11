@@ -4,9 +4,8 @@
  */
 
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
-import { getPromptsContainer } from '../../utils/cosmos';
+import { getPromptsCollection } from '../../utils/mongodb';
 import { getAuthenticatedUser } from '../../utils/auth';
-import { Prompt } from '../../models/types';
 
 async function deletePrompt(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
   context.log('DeletePrompt function processed a request.');
@@ -29,20 +28,17 @@ async function deletePrompt(request: HttpRequest, context: InvocationContext): P
       };
     }
 
-    const container = getPromptsContainer();
+    const collection = await getPromptsCollection();
 
-    // 既存プロンプトの取得（所有権チェック）
-    const { resource: existingPrompt } = await container.item(promptId, user.userId).read<Prompt>();
+    // プロンプトの検索と削除を1操作で実行
+    const result = await collection.findOneAndDelete({ id: promptId, userId: user.userId });
 
-    if (!existingPrompt) {
+    if (!result) {
       return {
         status: 404,
         jsonBody: { error: 'Prompt not found' },
       };
     }
-
-    // プロンプトの削除
-    await container.item(promptId, user.userId).delete();
 
     context.log(`Prompt deleted: ${promptId}`);
 

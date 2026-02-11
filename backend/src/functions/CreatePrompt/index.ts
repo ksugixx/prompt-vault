@@ -5,9 +5,9 @@
 
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
 import { v4 as uuidv4 } from 'uuid';
-import { getPromptsContainer } from '../../utils/cosmos';
+import { getPromptsCollection } from '../../utils/mongodb';
 import { getAuthenticatedUser } from '../../utils/auth';
-import { CreatePromptRequest, Prompt } from '../../models/types';
+import type { CreatePromptRequest, Prompt } from '../../models/types';
 
 function validatePromptRequest(body: CreatePromptRequest): { valid: boolean; error?: string } {
   if (!body.title || body.title.trim().length === 0) {
@@ -55,7 +55,7 @@ async function createPrompt(request: HttpRequest, context: InvocationContext): P
       };
     }
 
-    const container = getPromptsContainer();
+    const collection = await getPromptsCollection();
     const now = new Date().toISOString();
     const promptId = uuidv4();
 
@@ -71,7 +71,7 @@ async function createPrompt(request: HttpRequest, context: InvocationContext): P
       updatedAt: now,
     };
 
-    await container.items.create(newPrompt);
+    await collection.insertOne(newPrompt);
 
     context.log(`Prompt created: ${promptId}`);
 

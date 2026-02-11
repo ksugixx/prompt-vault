@@ -4,10 +4,10 @@
  */
 
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
-import { getUsersContainer } from '../../utils/cosmos';
+import { getUsersCollection } from '../../utils/mongodb';
 import { verifyPassword } from '../../utils/password';
 import { generateToken } from '../../utils/auth';
-import { LoginRequest, User } from '../../models/types';
+import type { LoginRequest, User } from '../../models/types';
 
 async function login(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
   context.log('Login function processed a request.');
@@ -25,24 +25,17 @@ async function login(request: HttpRequest, context: InvocationContext): Promise<
       };
     }
 
-    const container = getUsersContainer();
+    const collection = await getUsersCollection();
 
     // ユーザーの検索
-    const { resources: users } = await container.items
-      .query({
-        query: 'SELECT * FROM c WHERE c.username = @username',
-        parameters: [{ name: '@username', value: username }],
-      })
-      .fetchAll();
+    const user = await collection.findOne<User>({ username });
 
-    if (users.length === 0) {
+    if (!user) {
       return {
         status: 401,
         jsonBody: { error: 'Invalid credentials' },
       };
     }
-
-    const user = users[0] as User;
 
     // パスワードの検証
     const isPasswordValid = await verifyPassword(password, user.passwordHash);

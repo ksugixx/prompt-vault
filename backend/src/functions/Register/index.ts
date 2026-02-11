@@ -5,7 +5,7 @@
 
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
 import { v4 as uuidv4 } from 'uuid';
-import { getUsersContainer } from '../../utils/cosmos';
+import { getUsersCollection } from '../../utils/mongodb';
 import { hashPassword, validatePasswordStrength } from '../../utils/password';
 import { validateUsername } from '../../utils/auth';
 import { RegisterRequest, User } from '../../models/types';
@@ -36,17 +36,12 @@ async function register(request: HttpRequest, context: InvocationContext): Promi
       };
     }
 
-    const container = getUsersContainer();
+    const collection = await getUsersCollection();
 
     // ユーザー名の重複チェック
-    const { resources: existingUsers } = await container.items
-      .query({
-        query: 'SELECT * FROM c WHERE c.username = @username',
-        parameters: [{ name: '@username', value: username }],
-      })
-      .fetchAll();
+    const existingUser = await collection.findOne({ username });
 
-    if (existingUsers.length > 0) {
+    if (existingUser) {
       return {
         status: 400,
         jsonBody: { error: 'Username already exists' },
@@ -65,7 +60,7 @@ async function register(request: HttpRequest, context: InvocationContext): Promi
       createdAt: new Date().toISOString(),
     };
 
-    await container.items.create(newUser);
+    await collection.insertOne(newUser);
 
     context.log(`User registered successfully: ${username}`);
 

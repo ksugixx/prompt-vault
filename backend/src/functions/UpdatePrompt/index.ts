@@ -4,9 +4,9 @@
  */
 
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
-import { getPromptsContainer } from '../../utils/cosmos';
+import { getPromptsCollection } from '../../utils/mongodb';
 import { getAuthenticatedUser } from '../../utils/auth';
-import { UpdatePromptRequest, Prompt } from '../../models/types';
+import type { UpdatePromptRequest, Prompt } from '../../models/types';
 
 async function updatePrompt(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
   context.log('UpdatePrompt function processed a request.');
@@ -51,10 +51,10 @@ async function updatePrompt(request: HttpRequest, context: InvocationContext): P
       return { status: 400, jsonBody: { error: 'Maximum 10 tags allowed' } };
     }
 
-    const container = getPromptsContainer();
+    const collection = await getPromptsCollection();
 
     // 既存プロンプトの取得（所有権チェック）
-    const { resource: existingPrompt } = await container.item(promptId, user.userId).read<Prompt>();
+    const existingPrompt = await collection.findOne<Prompt>({ id: promptId, userId: user.userId });
 
     if (!existingPrompt) {
       return {
@@ -74,7 +74,9 @@ async function updatePrompt(request: HttpRequest, context: InvocationContext): P
       updatedAt: new Date().toISOString(),
     };
 
-    await container.item(promptId, user.userId).replace(updatedPrompt);
+    // MongoDBの_idフィールドを除外してreplaceOne
+    const { _id, ...promptWithoutMongoId } = updatedPrompt as Prompt & { _id?: unknown };
+    await collection.replaceOne({ id: promptId, userId: user.userId }, promptWithoutMongoId);
 
     context.log(`Prompt updated: ${promptId}`);
 
