@@ -287,14 +287,4 @@ REQUIREMENTS.mdに記載されているUser、Prompt、AuthTokenの型定義を�
 - https://tanstack.com/query/latest
 - https://tailwindcss.com/
 
----
 
-## Claude Codeへの最初の依頼
-
-このファイルを読んだら、以下の質問に答えてください：
-
-1. このプロジェクトの目的は何ですか？
-2. 実装の優先順位は何ですか？
-3. 次に実装すべきファイルは何ですか？
-
-その後、実装を開始しましょう。
