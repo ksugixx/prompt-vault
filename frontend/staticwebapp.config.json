@@ -17,5 +17,8 @@
   "globalHeaders": {
     "X-Content-Type-Options": "nosniff",
     "X-Frame-Options": "DENY"
+  },
+  "forwardingGateway": {
+    "allowedForwardedHosts": ["nice-ocean-0a4bcbe00.1.azurestaticapps.net"]
   }
 }

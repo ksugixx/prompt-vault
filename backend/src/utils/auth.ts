@@ -61,7 +61,7 @@ export function verifyToken(token: string): AuthTokenPayload | null {
  * @returns トークン、存在しない場合はnull
  */
 export function extractTokenFromRequest(request: HttpRequest): string | null {
-  const authHeader = request.headers.get('authorization');
+  const authHeader = request.headers.get('x-authorization') || request.headers.get('authorization');
 
   if (!authHeader) {
     return null;
