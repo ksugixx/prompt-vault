@@ -2,6 +2,29 @@
 
 このファイルは、Claude Codeがこのプロジェクトを効率的に理解し、実装するためのガイドです。
 
+## 開発ワークフロー（必須）
+
+Claude Codeは以下のフローを必ず守ること。mainブランチへの直接コミットは禁止。
+
+### フロー
+
+1. **計画**: 仕様を検討し、実装計画を立てる
+2. **ブランチ作成**: `git checkout -b feature/xxx` でfeatureブランチを作成
+3. **実装**: featureブランチ上で作業する
+4. **ローカルテスト**: 実装後、以下を実行して確認
+   - フロントエンド: `cd frontend && npm run build && npm run lint`
+   - バックエンド: `cd backend && npm run build`
+5. **コミット & push**: `git add <files> && git commit` → `git push -u origin feature/xxx`
+6. **PR作成**: `gh pr create` でプルリクエストを作成
+7. **レビュー待ち**: 人間がレビュー＆テスト → 承認 → マージ
+
+### ブランチ命名規則
+
+- 新機能: `feature/xxx`（例: `feature/add-login-page`）
+- バグ修正: `fix/xxx`（例: `fix/auth-token-expiry`）
+- リファクタ: `refactor/xxx`（例: `refactor/api-client`）
+- ドキュメント: `docs/xxx`（例: `docs/update-readme`）
+
 ## プロジェクト概要
 
 **プロジェクト名:** PromptVault  
