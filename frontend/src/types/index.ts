@@ -66,6 +66,18 @@ export interface CreatePromptResponse {
   message: string;
 }
 
+/** パスワード変更リクエスト */
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
+/** パスワード変更レスポンス */
+export interface ChangePasswordResponse {
+  message: string;
+}
+
 /** APIエラーレスポンス */
 export interface ApiError {
   error: string;
