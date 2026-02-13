@@ -67,6 +67,7 @@ async function createPrompt(request: HttpRequest, context: InvocationContext): P
       category: body.category.trim(),
       tags: body.tags || [],
       aiTool: body.aiTool,
+      isPinned: body.isPinned || false,
       createdAt: now,
       updatedAt: now,
     };

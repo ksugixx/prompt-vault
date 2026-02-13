@@ -29,6 +29,18 @@ async function getPrompts(request: HttpRequest, context: InvocationContext): Pro
     const category = request.query.get('category') || '';
     const tag = request.query.get('tag') || '';
     const aiTool = request.query.get('aiTool') || '';
+    const sortBy = request.query.get('sortBy') || 'createdAt';
+    const sortOrder = request.query.get('sortOrder') || 'desc';
+
+    // ソートパラメータのバリデーション
+    const validSortFields = ['createdAt', 'updatedAt', 'title'];
+    const validSortOrders = ['asc', 'desc'];
+    if (!validSortFields.includes(sortBy) || !validSortOrders.includes(sortOrder)) {
+      return {
+        status: 400,
+        jsonBody: { error: 'Invalid sort parameters' },
+      };
+    }
 
     // MongoDBフィルタの構築
     const filter: Filter<Document> = { userId: user.userId };
@@ -53,9 +65,10 @@ async function getPrompts(request: HttpRequest, context: InvocationContext): Pro
       ];
     }
 
+    const sortDirection = sortOrder === 'asc' ? 1 : -1;
     const prompts = await collection
       .find(filter)
-      .sort({ createdAt: -1 })
+      .sort({ [sortBy]: sortDirection })
       .toArray();
 
     return {

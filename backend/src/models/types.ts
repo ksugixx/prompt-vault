@@ -42,6 +42,8 @@ export interface Prompt {
   createdAt: string;
   /** 更新日時 (ISO 8601形式) */
   updatedAt: string;
+  /** ピン留め状態 */
+  isPinned?: boolean;
 }
 
 /**
@@ -53,17 +55,19 @@ export interface CreatePromptRequest {
   category: string;
   tags: string[];
   aiTool?: string;
+  isPinned?: boolean;
 }
 
 /**
  * プロンプト更新リクエスト
  */
 export interface UpdatePromptRequest {
-  title: string;
-  content: string;
-  category: string;
-  tags: string[];
+  title?: string;
+  content?: string;
+  category?: string;
+  tags?: string[];
   aiTool?: string;
+  isPinned?: boolean;
 }
 
 /**
@@ -122,6 +126,8 @@ export interface PromptQueryParams {
   category?: string;
   tag?: string;
   aiTool?: string;
+  sortBy?: 'createdAt' | 'updatedAt' | 'title';
+  sortOrder?: 'asc' | 'desc';
 }
 
 /**

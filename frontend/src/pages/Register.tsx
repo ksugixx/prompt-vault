@@ -78,18 +78,18 @@ const Register = () => {
   const strength = getPasswordStrength()
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
       <div className="w-full max-w-md">
-        <div className="bg-white rounded-2xl shadow-lg p-8">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8">
           {/* ヘッダー */}
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">PromptVault</h1>
-            <p className="text-gray-500 mt-2">新しいアカウントを作成</p>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">PromptVault</h1>
+            <p className="text-gray-500 dark:text-gray-400 mt-2">新しいアカウントを作成</p>
           </div>
 
           {/* エラーメッセージ */}
           {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+            <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 rounded-lg text-sm">
               {error}
             </div>
           )}
@@ -97,7 +97,7 @@ const Register = () => {
           {/* フォーム */}
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="username" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 ユーザー名
               </label>
               <input
@@ -106,7 +106,7 @@ const Register = () => {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-white dark:bg-gray-700 dark:text-gray-100"
                 placeholder="3〜20文字（英数字、アンダースコア）"
               />
               {username && (username.length < 3 || username.length > 20) && (
@@ -115,7 +115,7 @@ const Register = () => {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 パスワード
               </label>
               <input
@@ -124,25 +124,25 @@ const Register = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-white dark:bg-gray-700 dark:text-gray-100"
                 placeholder="8文字以上（英字と数字を含む）"
               />
               {/* パスワード強度表示 */}
               {password && (
                 <div className="mt-2">
-                  <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                  <div className="h-1.5 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
                     <div
                       className={`h-full ${strength.color} transition-all duration-300`}
                       style={{ width: strength.width }}
                     />
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">強度: {strength.level}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">強度: {strength.level}</p>
                 </div>
               )}
             </div>
 
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 パスワード確認
               </label>
               <input
@@ -151,7 +151,7 @@ const Register = () => {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-white dark:bg-gray-700 dark:text-gray-100"
                 placeholder="パスワードを再入力"
               />
               {confirmPassword && password !== confirmPassword && (
@@ -162,16 +162,16 @@ const Register = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? '登録中...' : 'アカウント作成'}
             </button>
           </form>
 
           {/* ログインリンク */}
-          <p className="text-center text-sm text-gray-500 mt-6">
+          <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-6">
             すでにアカウントをお持ちですか？{' '}
-            <Link to="/login" className="text-blue-600 hover:text-blue-700 font-medium">
+            <Link to="/login" className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium">
               ログインへ戻る
             </Link>
           </p>

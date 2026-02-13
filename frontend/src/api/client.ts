@@ -106,6 +106,8 @@ export const getPrompts = async (filters?: PromptFilters): Promise<PromptsRespon
   if (filters?.category) params.set('category', filters.category);
   if (filters?.tag) params.set('tag', filters.tag);
   if (filters?.aiTool) params.set('aiTool', filters.aiTool);
+  if (filters?.sortBy) params.set('sortBy', filters.sortBy);
+  if (filters?.sortOrder) params.set('sortOrder', filters.sortOrder);
 
   const response = await apiClient.get<PromptsResponse>('/prompts', { params });
   return response.data;
@@ -118,8 +120,13 @@ export const createPrompt = async (data: PromptFormData): Promise<CreatePromptRe
 };
 
 /** プロンプト更新 */
-export const updatePrompt = async (id: string, data: PromptFormData): Promise<void> => {
+export const updatePrompt = async (id: string, data: Partial<PromptFormData>): Promise<void> => {
   await apiClient.put(`/prompts/${id}`, data);
+};
+
+/** ピン留めトグル */
+export const togglePinPrompt = async (id: string, isPinned: boolean): Promise<void> => {
+  await apiClient.put(`/prompts/${id}`, { isPinned });
 };
 
 /** プロンプト削除 */

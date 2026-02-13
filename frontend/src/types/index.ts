@@ -19,6 +19,7 @@ export interface Prompt {
   aiTool?: string;
   createdAt: string;
   updatedAt: string;
+  isPinned?: boolean;
 }
 
 /** プロンプト作成/更新リクエスト */
@@ -28,6 +29,7 @@ export interface PromptFormData {
   category: string;
   tags: string[];
   aiTool?: string;
+  isPinned?: boolean;
 }
 
 /** ログインリクエスト */
@@ -89,6 +91,8 @@ export interface PromptFilters {
   category?: string;
   tag?: string;
   aiTool?: string;
+  sortBy?: 'createdAt' | 'updatedAt' | 'title';
+  sortOrder?: 'asc' | 'desc';
 }
 
 /** 認証状態 */
