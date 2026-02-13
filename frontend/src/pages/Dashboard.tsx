@@ -6,6 +6,7 @@ import type { Prompt, PromptFilters } from '../types'
 import PromptCard from '../components/PromptCard'
 import SearchFilter from '../components/SearchFilter'
 import PromptForm from './PromptForm'
+import ChangePasswordModal from '../components/ChangePasswordModal'
 
 const Dashboard = () => {
   const navigate = useNavigate()
@@ -16,6 +17,7 @@ const Dashboard = () => {
   const [showForm, setShowForm] = useState(false)
   const [editPrompt, setEditPrompt] = useState<Prompt | null>(null)
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
+  const [showChangePassword, setShowChangePassword] = useState(false)
 
   // プロンプト取得
   const { data, isLoading, error } = useQuery({
@@ -82,6 +84,12 @@ const Dashboard = () => {
           <h1 className="text-xl font-bold text-gray-900">PromptVault</h1>
           <div className="flex items-center gap-4">
             <span className="text-sm text-gray-500">{username}</span>
+            <button
+              onClick={() => setShowChangePassword(true)}
+              className="text-sm text-gray-500 hover:text-gray-700 px-3 py-1.5 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              パスワード変更
+            </button>
             <button
               onClick={handleLogout}
               className="text-sm text-gray-500 hover:text-gray-700 px-3 py-1.5 hover:bg-gray-100 rounded-lg transition-colors"
@@ -159,6 +167,11 @@ const Dashboard = () => {
           editPrompt={editPrompt}
           onClose={handleCloseForm}
         />
+      )}
+
+      {/* パスワード変更モーダル */}
+      {showChangePassword && (
+        <ChangePasswordModal onClose={() => setShowChangePassword(false)} />
       )}
 
       {/* 削除確認ダイアログ */}

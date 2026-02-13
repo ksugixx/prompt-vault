@@ -106,6 +106,15 @@ export interface LoginResponse {
 }
 
 /**
+ * パスワード変更リクエスト
+ */
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
+/**
  * プロンプト検索クエリパラメータ
  */
 export interface PromptQueryParams {

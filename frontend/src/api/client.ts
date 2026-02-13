@@ -10,6 +10,8 @@ import type {
   LoginResponse,
   RegisterRequest,
   RegisterResponse,
+  ChangePasswordRequest,
+  ChangePasswordResponse,
   PromptsResponse,
   PromptFormData,
   CreatePromptResponse,
@@ -35,15 +37,22 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
+/** 401自動リダイレクトを除外するパス（認証エラーを自前でハンドリングするエンドポイント） */
+const AUTH_ERROR_SELF_HANDLED = ['/login', '/register', '/change-password'];
+
 /** レスポンスインターセプター: 401エラー時の自動ログアウト */
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('userId');
-      localStorage.removeItem('username');
-      window.location.href = '/login';
+      const requestUrl = error.config?.url || '';
+      const isSelfHandled = AUTH_ERROR_SELF_HANDLED.some((path) => requestUrl.endsWith(path));
+      if (!isSelfHandled) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('userId');
+        localStorage.removeItem('username');
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }
@@ -72,6 +81,12 @@ export const logout = (): void => {
   localStorage.removeItem('token');
   localStorage.removeItem('userId');
   localStorage.removeItem('username');
+};
+
+/** パスワード変更 */
+export const changePassword = async (data: ChangePasswordRequest): Promise<ChangePasswordResponse> => {
+  const response = await apiClient.post<ChangePasswordResponse>('/change-password', data);
+  return response.data;
 };
 
 /** 認証状態の取得 */
