@@ -1,4 +1,4 @@
-import { useState, type FormEvent, useEffect } from 'react'
+import { useState, type FormEvent } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { createPrompt, updatePrompt } from '../api/client'
 import type { Prompt, PromptFormData } from '../types'
@@ -23,8 +23,10 @@ const PromptForm = ({ editPrompt, onClose }: PromptFormProps) => {
   const [error, setError] = useState('')
   const [showPreview, setShowPreview] = useState(false)
 
-  // 編集モード時の初期値設定
-  useEffect(() => {
+  // 編集モード時の初期値設定（レンダリング中に調整）
+  const [prevEditPrompt, setPrevEditPrompt] = useState(editPrompt)
+  if (editPrompt !== prevEditPrompt) {
+    setPrevEditPrompt(editPrompt)
     if (editPrompt) {
       setTitle(editPrompt.title)
       setContent(editPrompt.content)
@@ -32,7 +34,7 @@ const PromptForm = ({ editPrompt, onClose }: PromptFormProps) => {
       setTags(editPrompt.tags)
       setAiTool(editPrompt.aiTool || '')
     }
-  }, [editPrompt])
+  }
 
   const createMutation = useMutation({
     mutationFn: (data: PromptFormData) => createPrompt(data),

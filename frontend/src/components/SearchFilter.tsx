@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import type { PromptFilters } from '../types'
 import { CATEGORIES, AI_TOOLS } from '../types'
 
@@ -12,19 +12,32 @@ const selectClass = 'px-3 py-2 border border-gray-300 dark:border-gray-600 round
 
 const SearchFilter = ({ filters, onFilterChange, availableTags }: SearchFilterProps) => {
   const [searchInput, setSearchInput] = useState(filters.search || '')
+  const filtersRef = useRef(filters)
+  const onFilterChangeRef = useRef(onFilterChange)
+
+  useEffect(() => {
+    filtersRef.current = filters
+    onFilterChangeRef.current = onFilterChange
+  })
+
+  // 外部からフィルタが変更された場合に同期（レンダリング中に調整）
+  const [prevSearch, setPrevSearch] = useState(filters.search)
+  if (filters.search !== prevSearch) {
+    setPrevSearch(filters.search)
+    setSearchInput(filters.search || '')
+  }
 
   // 検索入力のデバウンス
+  const debouncedOnFilterChange = useCallback((value: string) => {
+    onFilterChangeRef.current({ ...filtersRef.current, search: value || undefined })
+  }, [])
+
   useEffect(() => {
     const timer = setTimeout(() => {
-      onFilterChange({ ...filters, search: searchInput || undefined })
+      debouncedOnFilterChange(searchInput)
     }, 300)
     return () => clearTimeout(timer)
-  }, [searchInput])
-
-  // 外部からフィルタが変更された場合に同期
-  useEffect(() => {
-    setSearchInput(filters.search || '')
-  }, [filters.search])
+  }, [searchInput, debouncedOnFilterChange])
 
   const handleClearFilters = () => {
     setSearchInput('')
