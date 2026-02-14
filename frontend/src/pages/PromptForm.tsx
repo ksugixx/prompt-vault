@@ -14,12 +14,12 @@ const selectClass = 'w-full px-4 py-2.5 border border-gray-300 dark:border-gray-
 
 const PromptForm = ({ editPrompt, onClose }: PromptFormProps) => {
   const queryClient = useQueryClient()
-  const [title, setTitle] = useState('')
-  const [content, setContent] = useState('')
-  const [category, setCategory] = useState<string>(CATEGORIES[0])
-  const [tags, setTags] = useState<string[]>([])
+  const [title, setTitle] = useState(editPrompt?.title || '')
+  const [content, setContent] = useState(editPrompt?.content || '')
+  const [category, setCategory] = useState<string>(editPrompt?.category || CATEGORIES[0])
+  const [tags, setTags] = useState<string[]>(editPrompt?.tags || [])
   const [tagInput, setTagInput] = useState('')
-  const [aiTool, setAiTool] = useState<string>('')
+  const [aiTool, setAiTool] = useState<string>(editPrompt?.aiTool || '')
   const [error, setError] = useState('')
   const [showPreview, setShowPreview] = useState(false)
 
