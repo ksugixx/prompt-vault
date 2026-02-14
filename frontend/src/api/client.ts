@@ -16,6 +16,8 @@ import type {
   PromptFormData,
   CreatePromptResponse,
   PromptFilters,
+  Prompt,
+  ImportPromptsResponse,
 } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
@@ -132,6 +134,55 @@ export const togglePinPrompt = async (id: string, isPinned: boolean): Promise<vo
 /** プロンプト削除 */
 export const deletePrompt = async (id: string): Promise<void> => {
   await apiClient.delete(`/prompts/${id}`);
+};
+
+// ===== インポート・エクスポート =====
+
+/** プロンプトをJSONファイルとしてエクスポート */
+export const exportPromptsToFile = (prompts: Prompt[]): void => {
+  const exportData = prompts.map((p) => ({
+    title: p.title,
+    content: p.content,
+    category: p.category,
+    tags: p.tags,
+    ...(p.aiTool && { aiTool: p.aiTool }),
+    ...(p.isPinned && { isPinned: p.isPinned }),
+  }));
+  const json = JSON.stringify(exportData, null, 2);
+  const blob = new Blob([json], { type: 'application/json;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `prompts-${new Date().toISOString().slice(0, 10)}.json`;
+  link.click();
+  URL.revokeObjectURL(url);
+};
+
+/** JSONファイルをパースしてプロンプトデータを抽出 */
+export const parseImportFile = (file: File): Promise<PromptFormData[]> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = JSON.parse(e.target?.result as string);
+        const prompts = Array.isArray(data) ? data : data.prompts;
+        if (!Array.isArray(prompts)) {
+          throw new Error('JSONはプロンプトの配列、または "prompts" プロパティを含むオブジェクトである必要があります');
+        }
+        resolve(prompts);
+      } catch (err) {
+        reject(err instanceof Error ? err : new Error('不正なJSON形式です'));
+      }
+    };
+    reader.onerror = () => reject(new Error('ファイルの読み込みに失敗しました'));
+    reader.readAsText(file);
+  });
+};
+
+/** プロンプトの一括インポート */
+export const importPrompts = async (prompts: PromptFormData[]): Promise<ImportPromptsResponse> => {
+  const response = await apiClient.post<ImportPromptsResponse>('/prompts/import', { prompts });
+  return response.data;
 };
 
 export default apiClient;

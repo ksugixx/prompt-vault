@@ -1,12 +1,13 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { getPrompts, deletePrompt, togglePinPrompt, logout, getAuthState } from '../api/client'
+import { getPrompts, deletePrompt, togglePinPrompt, logout, getAuthState, exportPromptsToFile } from '../api/client'
 import type { Prompt, PromptFilters } from '../types'
 import PromptCard from '../components/PromptCard'
 import SearchFilter from '../components/SearchFilter'
 import PromptForm from './PromptForm'
 import ChangePasswordModal from '../components/ChangePasswordModal'
+import ImportModal from '../components/ImportModal'
 import ThemeToggle from '../components/ThemeToggle'
 
 const Dashboard = () => {
@@ -19,6 +20,7 @@ const Dashboard = () => {
   const [editPrompt, setEditPrompt] = useState<Prompt | null>(null)
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
   const [showChangePassword, setShowChangePassword] = useState(false)
+  const [showImportModal, setShowImportModal] = useState(false)
 
   // プロンプト取得
   const { data, isLoading, error } = useQuery({
@@ -105,6 +107,21 @@ const Dashboard = () => {
           <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">PromptVault</h1>
           <div className="flex items-center gap-2">
             <ThemeToggle />
+            <button
+              onClick={() => exportPromptsToFile(prompts)}
+              disabled={prompts.length === 0}
+              className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              title="プロンプトをJSONファイルとしてエクスポート"
+            >
+              エクスポート
+            </button>
+            <button
+              onClick={() => setShowImportModal(true)}
+              className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              title="JSONファイルからプロンプトをインポート"
+            >
+              インポート
+            </button>
             <span className="text-sm text-gray-500 dark:text-gray-400 hidden sm:inline">{username}</span>
             <button
               onClick={() => setShowChangePassword(true)}
@@ -195,6 +212,14 @@ const Dashboard = () => {
       {/* パスワード変更モーダル */}
       {showChangePassword && (
         <ChangePasswordModal onClose={() => setShowChangePassword(false)} />
+      )}
+
+      {/* インポートモーダル */}
+      {showImportModal && (
+        <ImportModal
+          onClose={() => setShowImportModal(false)}
+          onSuccess={() => queryClient.invalidateQueries({ queryKey: ['prompts'] })}
+        />
       )}
 
       {/* 削除確認ダイアログ */}
