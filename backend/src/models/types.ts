@@ -155,3 +155,13 @@ export const AI_TOOLS = [
 
 export type Category = typeof CATEGORIES[number];
 export type AITool = typeof AI_TOOLS[number];
+
+/**
+ * プロンプトインポートレスポンス
+ */
+export interface ImportPromptsResponse {
+  message: string;
+  importedCount: number;
+  failedCount: number;
+  errors?: Array<{ index: number; error: string }>;
+}
