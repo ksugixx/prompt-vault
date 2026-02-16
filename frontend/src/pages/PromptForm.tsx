@@ -21,7 +21,6 @@ const PromptForm = ({ editPrompt, onClose }: PromptFormProps) => {
   const [tagInput, setTagInput] = useState('')
   const [aiTool, setAiTool] = useState<string>(editPrompt?.aiTool || '')
   const [error, setError] = useState('')
-  const [showPreview, setShowPreview] = useState(false)
 
   // 編集モード時の初期値設定（レンダリング中に調整）
   const [prevEditPrompt, setPrevEditPrompt] = useState(editPrompt)
@@ -158,33 +157,18 @@ const PromptForm = ({ editPrompt, onClose }: PromptFormProps) => {
 
             {/* 本文 */}
             <div>
-              <div className="flex items-center justify-between mb-1">
-                <label htmlFor="content" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  本文 <span className="text-red-500">*</span>
-                </label>
-                <button
-                  type="button"
-                  onClick={() => setShowPreview(!showPreview)}
-                  className="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                >
-                  {showPreview ? '編集に戻る' : 'プレビュー'}
-                </button>
-              </div>
-              {showPreview ? (
-                <div className="w-full min-h-[200px] px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap">
-                  {content || '(本文なし)'}
-                </div>
-              ) : (
-                <textarea
-                  id="content"
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  rows={8}
-                  className={`${inputClass} resize-y text-sm`}
-                  placeholder="プロンプトの内容（マークダウン対応）"
-                  maxLength={10000}
-                />
-              )}
+              <label htmlFor="content" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                本文 <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                id="content"
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                rows={8}
+                className={`${inputClass} resize-y text-sm`}
+                placeholder="プロンプトの内容（マークダウン対応）"
+                maxLength={10000}
+              />
               <p className="text-xs text-gray-400 dark:text-gray-500 mt-1 text-right">{content.length}/10,000</p>
             </div>
 
