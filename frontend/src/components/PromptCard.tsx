@@ -2,6 +2,7 @@ import type { Prompt } from '../types'
 
 interface PromptCardProps {
   prompt: Prompt
+  onClick: (prompt: Prompt) => void
   onEdit: (prompt: Prompt) => void
   onDelete: (id: string) => void
   onTogglePin: (prompt: Prompt) => void
@@ -16,7 +17,7 @@ const AI_TOOL_COLORS: Record<string, string> = {
   Other: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
 }
 
-const PromptCard = ({ prompt, onEdit, onDelete, onTogglePin, onTagClick, onCategoryClick }: PromptCardProps) => {
+const PromptCard = ({ prompt, onClick, onEdit, onDelete, onTogglePin, onTagClick, onCategoryClick }: PromptCardProps) => {
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(prompt.content)
@@ -47,12 +48,15 @@ const PromptCard = ({ prompt, onEdit, onDelete, onTogglePin, onTagClick, onCateg
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow p-5">
+    <div
+      className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow p-5 cursor-pointer"
+      onClick={() => onClick(prompt)}
+    >
       {/* ヘッダー */}
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-start gap-2 flex-1 mr-2">
           <button
-            onClick={() => onTogglePin(prompt)}
+            onClick={(e) => { e.stopPropagation(); onTogglePin(prompt) }}
             className={`shrink-0 p-1 rounded transition-colors ${
               prompt.isPinned
                 ? 'text-yellow-500 hover:text-yellow-600'
@@ -83,7 +87,7 @@ const PromptCard = ({ prompt, onEdit, onDelete, onTogglePin, onTagClick, onCateg
       {/* カテゴリ・タグ */}
       <div className="flex flex-wrap gap-1.5 mb-3">
         <button
-          onClick={() => onCategoryClick(prompt.category)}
+          onClick={(e) => { e.stopPropagation(); onCategoryClick(prompt.category) }}
           className="text-xs font-medium px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-300 dark:hover:bg-blue-900/50 transition-colors"
         >
           {prompt.category}
@@ -91,7 +95,7 @@ const PromptCard = ({ prompt, onEdit, onDelete, onTogglePin, onTagClick, onCateg
         {prompt.tags.map((tag) => (
           <button
             key={tag}
-            onClick={() => onTagClick(tag)}
+            onClick={(e) => { e.stopPropagation(); onTagClick(tag) }}
             className="text-xs font-medium px-2.5 py-1 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-400 dark:hover:bg-gray-600 transition-colors"
           >
             {tag}
@@ -106,7 +110,7 @@ const PromptCard = ({ prompt, onEdit, onDelete, onTogglePin, onTagClick, onCateg
         </span>
         <div className="flex gap-1">
           <button
-            onClick={handleCopy}
+            onClick={(e) => { e.stopPropagation(); handleCopy() }}
             className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
             title="コピー"
           >
@@ -115,7 +119,7 @@ const PromptCard = ({ prompt, onEdit, onDelete, onTogglePin, onTagClick, onCateg
             </svg>
           </button>
           <button
-            onClick={() => onEdit(prompt)}
+            onClick={(e) => { e.stopPropagation(); onEdit(prompt) }}
             className="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/30 rounded-lg transition-colors"
             title="編集"
           >
@@ -124,7 +128,7 @@ const PromptCard = ({ prompt, onEdit, onDelete, onTogglePin, onTagClick, onCateg
             </svg>
           </button>
           <button
-            onClick={() => onDelete(prompt.id)}
+            onClick={(e) => { e.stopPropagation(); onDelete(prompt.id) }}
             className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
             title="削除"
           >
