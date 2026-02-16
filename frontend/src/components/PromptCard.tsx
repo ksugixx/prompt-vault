@@ -1,4 +1,21 @@
 import type { Prompt } from '../types'
+import codingImg from '../assets/categories/coding.png'
+import writingImg from '../assets/categories/writing.png'
+import analysisImg from '../assets/categories/analysis.png'
+import translationImg from '../assets/categories/translation.png'
+import summaryImg from '../assets/categories/summary.png'
+import ideaImg from '../assets/categories/idea.png'
+import otherImg from '../assets/categories/other.png'
+
+const CATEGORY_IMAGES: Record<string, string> = {
+  'コーディング': codingImg,
+  'ライティング': writingImg,
+  '分析': analysisImg,
+  '翻訳': translationImg,
+  '要約': summaryImg,
+  'アイデア出し': ideaImg,
+  'その他': otherImg,
+}
 
 interface PromptCardProps {
   prompt: Prompt
@@ -49,9 +66,16 @@ const PromptCard = ({ prompt, onClick, onEdit, onDelete, onTogglePin, onTagClick
 
   return (
     <div
-      className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow p-5 cursor-pointer"
+      className="relative bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow p-5 cursor-pointer overflow-hidden"
       onClick={() => onClick(prompt)}
     >
+      {/* カテゴリ背景画像 */}
+      {CATEGORY_IMAGES[prompt.category] && (
+        <div
+          className="absolute right-2 bottom-2 w-24 h-24 bg-no-repeat bg-contain bg-center opacity-50 dark:opacity-45 pointer-events-none"
+          style={{ backgroundImage: `url(${CATEGORY_IMAGES[prompt.category]})` }}
+        />
+      )}
       {/* ヘッダー */}
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-start gap-2 flex-1 mr-2">
