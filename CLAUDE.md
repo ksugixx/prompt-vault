@@ -13,8 +13,8 @@ Claude Codeは以下のフローを必ず守ること。mainブランチへの�
 2. **ブランチ作成**: `git checkout -b feature/xxx` でfeatureブランチを作成
 3. **実装**: featureブランチ上で作業する
 4. **ローカルテスト**: 実装後、以下を実行して確認
-   - フロントエンド: `cd frontend && npm run build && npm run lint`
-   - バックエンド: `cd backend && npm run build`
+   - フロントエンド: `cd frontend && npm test && npm run build && npm run lint`
+   - バックエンド: `cd backend && npm test && npm run build`
 5. **コミット & push**: `git add <files> && git commit` → `git push -u origin feature/xxx`
 6. **PR作成**: `gh pr create` でプルリクエストを作成
 7. **レビュー待ち**: 人間がレビュー＆テスト → 承認 → マージ
@@ -79,6 +79,15 @@ prompt-vault/
 - **users**: `{ username: 1 }` unique - ユーザー名の一意性保証・検索用
 - **prompts**: `{ userId: 1, createdAt: -1 }` - ユーザーごとの一覧取得用
 - **prompts**: `{ _id: 1, userId: 1 }` - 更新・削除の所有権チェック用
+
+### テスト方針
+- **新機能追加時はテストも必ず作成する**
+- テストランナー: Vitest（フロントエンド・バックエンド共通）
+- バックエンド: `backend/src/**/*.test.ts` にユニットテストを配置
+- フロントエンド: `frontend/src/**/*.test.{ts,tsx}` にユニット/コンポーネントテストを配置
+- テスト実行: `npm test`（各ディレクトリ内）
+- カバレッジ確認: `npm run test:coverage`
+- CI/CD: テスト失敗時はデプロイがブロックされる
 
 ### CORS設定
 - **開発環境**: すべてのオリジンを許可 (*)
