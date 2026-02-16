@@ -61,6 +61,7 @@ async function getPrompts(request: HttpRequest, context: InvocationContext): Pro
       const escapedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       filter.$or = [
         { title: { $regex: escapedSearch, $options: 'i' } },
+        { description: { $regex: escapedSearch, $options: 'i' } },
         { content: { $regex: escapedSearch, $options: 'i' } },
       ];
     }

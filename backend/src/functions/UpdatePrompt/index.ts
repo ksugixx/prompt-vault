@@ -53,6 +53,9 @@ async function updatePrompt(request: HttpRequest, context: InvocationContext): P
         return { status: 400, jsonBody: { error: 'Category is required' } };
       }
     }
+    if (body.description !== undefined && body.description.length > 200) {
+      return { status: 400, jsonBody: { error: 'Description must be 200 characters or less' } };
+    }
     if (body.tags && body.tags.length > 10) {
       return { status: 400, jsonBody: { error: 'Maximum 10 tags allowed' } };
     }
@@ -74,6 +77,7 @@ async function updatePrompt(request: HttpRequest, context: InvocationContext): P
       ...existingPrompt,
       title: body.title !== undefined ? body.title.trim() : existingPrompt.title,
       content: body.content !== undefined ? body.content : existingPrompt.content,
+      description: body.description !== undefined ? body.description?.trim() : existingPrompt.description,
       category: body.category !== undefined ? body.category.trim() : existingPrompt.category,
       tags: body.tags !== undefined ? body.tags : existingPrompt.tags,
       aiTool: body.aiTool !== undefined ? body.aiTool : existingPrompt.aiTool,

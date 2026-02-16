@@ -32,6 +32,8 @@ export interface Prompt {
   title: string;
   /** 本文 (マークダウン対応、最大10,000文字) */
   content: string;
+  /** 説明 (任意、最大200文字、カード表示用) */
+  description?: string;
   /** カテゴリ */
   category: string;
   /** タグ (最大10個) */
@@ -52,6 +54,7 @@ export interface Prompt {
 export interface CreatePromptRequest {
   title: string;
   content: string;
+  description?: string;
   category: string;
   tags: string[];
   aiTool?: string;
@@ -64,6 +67,7 @@ export interface CreatePromptRequest {
 export interface UpdatePromptRequest {
   title?: string;
   content?: string;
+  description?: string;
   category?: string;
   tags?: string[];
   aiTool?: string;

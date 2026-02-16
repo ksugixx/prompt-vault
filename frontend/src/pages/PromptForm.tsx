@@ -16,6 +16,7 @@ const PromptForm = ({ editPrompt, onClose }: PromptFormProps) => {
   const queryClient = useQueryClient()
   const [title, setTitle] = useState(editPrompt?.title || '')
   const [content, setContent] = useState(editPrompt?.content || '')
+  const [description, setDescription] = useState(editPrompt?.description || '')
   const [category, setCategory] = useState<string>(editPrompt?.category || CATEGORIES[0])
   const [tags, setTags] = useState<string[]>(editPrompt?.tags || [])
   const [tagInput, setTagInput] = useState('')
@@ -29,6 +30,7 @@ const PromptForm = ({ editPrompt, onClose }: PromptFormProps) => {
     if (editPrompt) {
       setTitle(editPrompt.title)
       setContent(editPrompt.content)
+      setDescription(editPrompt.description || '')
       setCategory(editPrompt.category)
       setTags(editPrompt.tags)
       setAiTool(editPrompt.aiTool || '')
@@ -95,10 +97,15 @@ const PromptForm = ({ editPrompt, onClose }: PromptFormProps) => {
       setError('本文は10,000文字以内で入力してください')
       return
     }
+    if (description.length > 200) {
+      setError('説明文は200文字以内で入力してください')
+      return
+    }
 
     const data: PromptFormData = {
       title: title.trim(),
       content,
+      description: description.trim() || undefined,
       category,
       tags,
       aiTool: aiTool || undefined,
@@ -153,6 +160,23 @@ const PromptForm = ({ editPrompt, onClose }: PromptFormProps) => {
                 maxLength={200}
               />
               <p className="text-xs text-gray-400 dark:text-gray-500 mt-1 text-right">{title.length}/200</p>
+            </div>
+
+            {/* 説明文 */}
+            <div>
+              <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                説明文
+              </label>
+              <textarea
+                id="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows={2}
+                className={`${inputClass} resize-y text-sm`}
+                placeholder="プロンプトの簡単な説明（カードに表示されます）"
+                maxLength={200}
+              />
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-1 text-right">{description.length}/200</p>
             </div>
 
             {/* 本文 */}

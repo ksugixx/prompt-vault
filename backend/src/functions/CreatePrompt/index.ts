@@ -25,6 +25,9 @@ function validatePromptRequest(body: CreatePromptRequest): { valid: boolean; err
   if (!body.category || body.category.trim().length === 0) {
     return { valid: false, error: 'Category is required' };
   }
+  if (body.description !== undefined && body.description.length > 200) {
+    return { valid: false, error: 'Description must be 200 characters or less' };
+  }
   if (body.tags && body.tags.length > 10) {
     return { valid: false, error: 'Maximum 10 tags allowed' };
   }
@@ -64,6 +67,7 @@ async function createPrompt(request: HttpRequest, context: InvocationContext): P
       userId: user.userId,
       title: body.title.trim(),
       content: body.content,
+      description: body.description?.trim(),
       category: body.category.trim(),
       tags: body.tags || [],
       aiTool: body.aiTool,
