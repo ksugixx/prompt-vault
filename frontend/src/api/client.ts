@@ -143,6 +143,7 @@ export const exportPromptsToFile = (prompts: Prompt[]): void => {
   const exportData = prompts.map((p) => ({
     title: p.title,
     content: p.content,
+    ...(p.description && { description: p.description }),
     category: p.category,
     tags: p.tags,
     ...(p.aiTool && { aiTool: p.aiTool }),

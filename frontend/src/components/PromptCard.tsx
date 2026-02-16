@@ -79,9 +79,9 @@ const PromptCard = ({ prompt, onClick, onEdit, onDelete, onTogglePin, onTagClick
         )}
       </div>
 
-      {/* 本文プレビュー */}
+      {/* 説明 or 本文プレビュー */}
       <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-3 mb-3">
-        {prompt.content}
+        {prompt.description || prompt.content}
       </p>
 
       {/* カテゴリ・タグ */}

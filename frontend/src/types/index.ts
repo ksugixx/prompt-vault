@@ -14,6 +14,7 @@ export interface Prompt {
   userId: string;
   title: string;
   content: string;
+  description?: string;
   category: string;
   tags: string[];
   aiTool?: string;
@@ -26,6 +27,7 @@ export interface Prompt {
 export interface PromptFormData {
   title: string;
   content: string;
+  description?: string;
   category: string;
   tags: string[];
   aiTool?: string;

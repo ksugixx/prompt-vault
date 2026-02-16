@@ -27,6 +27,9 @@ function validatePromptData(body: CreatePromptRequest, index: number): string | 
   if (!body.category || body.category.trim().length === 0) {
     return `Prompt ${index + 1}: Category is required`;
   }
+  if (body.description !== undefined && body.description.length > 200) {
+    return `Prompt ${index + 1}: Description must be 200 characters or less`;
+  }
   if (body.tags && body.tags.length > 10) {
     return `Prompt ${index + 1}: Maximum 10 tags allowed`;
   }
@@ -89,6 +92,7 @@ async function importPrompts(request: HttpRequest, context: InvocationContext): 
         userId: user.userId,
         title: promptData.title.trim(),
         content: promptData.content,
+        description: promptData.description?.trim(),
         category: promptData.category.trim(),
         tags: promptData.tags || [],
         aiTool: promptData.aiTool,
