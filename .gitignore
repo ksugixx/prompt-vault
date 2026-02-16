@@ -36,5 +36,5 @@ obj/
 *.tmp
 
 # Claude Code
-.claude/
-.claude/conversations
+.claude/*
+!.claude/rules.md
