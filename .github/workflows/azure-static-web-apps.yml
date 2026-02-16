@@ -25,16 +25,19 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install and build backend
+      - name: Install and test backend
         run: |
           cd backend
           npm ci
+          npm test
           npm run build
 
-      - name: Install frontend dependencies
+      - name: Install and test frontend
         run: |
           cd frontend
           npm ci
+          npm test
+          npm run lint
 
       - name: Build and Deploy
         id: deploy
