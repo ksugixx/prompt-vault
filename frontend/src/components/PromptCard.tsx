@@ -72,7 +72,7 @@ const PromptCard = ({ prompt, onClick, onEdit, onDelete, onTogglePin, onTagClick
       {/* カテゴリ背景画像 */}
       {CATEGORY_IMAGES[prompt.category] && (
         <div
-          className="absolute right-2 bottom-2 w-24 h-24 bg-no-repeat bg-contain bg-center opacity-[0.07] dark:opacity-[0.05] pointer-events-none"
+          className="absolute right-2 bottom-2 w-24 h-24 bg-no-repeat bg-contain bg-center opacity-20 dark:opacity-15 pointer-events-none"
           style={{ backgroundImage: `url(${CATEGORY_IMAGES[prompt.category]})` }}
         />
       )}
