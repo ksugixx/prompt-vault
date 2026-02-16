@@ -8,6 +8,7 @@ import SearchFilter from '../components/SearchFilter'
 import PromptForm from './PromptForm'
 import ChangePasswordModal from '../components/ChangePasswordModal'
 import ImportModal from '../components/ImportModal'
+import PromptDetailModal from '../components/PromptDetailModal'
 import ThemeToggle from '../components/ThemeToggle'
 
 const Dashboard = () => {
@@ -21,6 +22,7 @@ const Dashboard = () => {
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
   const [showChangePassword, setShowChangePassword] = useState(false)
   const [showImportModal, setShowImportModal] = useState(false)
+  const [selectedPrompt, setSelectedPrompt] = useState<Prompt | null>(null)
 
   // プロンプト取得
   const { data, isLoading, error } = useQuery({
@@ -62,7 +64,12 @@ const Dashboard = () => {
     return Array.from(tagSet).sort()
   }, [prompts])
 
+  const handleCardClick = (prompt: Prompt) => {
+    setSelectedPrompt(prompt)
+  }
+
   const handleEdit = (prompt: Prompt) => {
+    setSelectedPrompt(null)
     setEditPrompt(prompt)
     setShowForm(true)
   }
@@ -177,6 +184,7 @@ const Dashboard = () => {
                   <PromptCard
                     key={prompt.id}
                     prompt={prompt}
+                    onClick={handleCardClick}
                     onEdit={handleEdit}
                     onDelete={handleDelete}
                     onTogglePin={handleTogglePin}
@@ -206,6 +214,15 @@ const Dashboard = () => {
         <PromptForm
           editPrompt={editPrompt}
           onClose={handleCloseForm}
+        />
+      )}
+
+      {/* プロンプト詳細モーダル */}
+      {selectedPrompt && (
+        <PromptDetailModal
+          prompt={selectedPrompt}
+          onClose={() => setSelectedPrompt(null)}
+          onEdit={handleEdit}
         />
       )}
 
