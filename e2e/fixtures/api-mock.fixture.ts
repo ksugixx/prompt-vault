@@ -1,7 +1,6 @@
 import { test as base, type Page } from '@playwright/test'
 import {
-  MOCK_LOGIN_RESPONSE,
-  MOCK_REGISTER_RESPONSE,
+  MOCK_GOOGLE_AUTH_RESPONSE,
   MOCK_PROMPTS,
   MOCK_CREATE_PROMPT_RESPONSE,
 } from '../helpers/mock-data'
@@ -12,28 +11,14 @@ type ApiMockFixtures = {
 
 export const test = base.extend<ApiMockFixtures>({
   mockApi: async ({ page }, use) => {
-    // POST /api/login
-    await page.route('**/api/login', async (route) => {
+    // POST /api/auth/google
+    await page.route('**/api/auth/google', async (route) => {
       const request = route.request()
       if (request.method() === 'POST') {
         await route.fulfill({
           status: 200,
           contentType: 'application/json',
-          body: JSON.stringify(MOCK_LOGIN_RESPONSE),
-        })
-      } else {
-        await route.continue()
-      }
-    })
-
-    // POST /api/register
-    await page.route('**/api/register', async (route) => {
-      const request = route.request()
-      if (request.method() === 'POST') {
-        await route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify(MOCK_REGISTER_RESPONSE),
+          body: JSON.stringify(MOCK_GOOGLE_AUTH_RESPONSE),
         })
       } else {
         await route.continue()
