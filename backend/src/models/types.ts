@@ -4,16 +4,19 @@
 
 /**
  * ユーザー
- * Cosmos DB コンテナ: Users
- * パーティションキー: /id
+ * MongoDB コレクション: Users
  */
 export interface User {
   /** ユーザーID (UUID v4) */
   id: string;
-  /** ユーザー名 (ユニーク、3-20文字) */
-  username: string;
-  /** パスワードハッシュ (bcryptでハッシュ化) */
-  passwordHash: string;
+  /** Google ID (sub claim) - ユニーク */
+  googleId: string;
+  /** メールアドレス */
+  email: string;
+  /** 表示名 (Google profile name) */
+  displayName: string;
+  /** プロフィール画像URL */
+  pictureUrl?: string;
   /** 作成日時 (ISO 8601形式) */
   createdAt: string;
 }
@@ -75,19 +78,11 @@ export interface UpdatePromptRequest {
 }
 
 /**
- * ユーザー登録リクエスト
+ * Google認証リクエスト
  */
-export interface RegisterRequest {
-  username: string;
-  password: string;
-}
-
-/**
- * ログインリクエスト
- */
-export interface LoginRequest {
-  username: string;
-  password: string;
+export interface GoogleAuthRequest {
+  /** Google IDトークン (クライアントから送信) */
+  idToken: string;
 }
 
 /**
@@ -96,8 +91,8 @@ export interface LoginRequest {
 export interface AuthTokenPayload {
   /** ユーザーID */
   userId: string;
-  /** ユーザー名 */
-  username: string;
+  /** 表示名 */
+  displayName: string;
   /** トークン発行日時 (Unix timestamp) */
   iat?: number;
   /** トークン有効期限 (Unix timestamp) */
@@ -105,21 +100,15 @@ export interface AuthTokenPayload {
 }
 
 /**
- * ログインレスポンス
+ * Google認証レスポンス
  */
-export interface LoginResponse {
+export interface GoogleAuthResponse {
   token: string;
   userId: string;
-  username: string;
-}
-
-/**
- * パスワード変更リクエスト
- */
-export interface ChangePasswordRequest {
-  currentPassword: string;
-  newPassword: string;
-  confirmPassword: string;
+  displayName: string;
+  email: string;
+  pictureUrl?: string;
+  isNewUser: boolean;
 }
 
 /**

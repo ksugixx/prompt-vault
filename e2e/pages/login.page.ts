@@ -2,30 +2,41 @@ import type { Page, Locator } from '@playwright/test'
 
 export class LoginPage {
   readonly page: Page
-  readonly usernameInput: Locator
-  readonly passwordInput: Locator
-  readonly submitButton: Locator
-  readonly errorMessage: Locator
-  readonly registerLink: Locator
   readonly heading: Locator
+  readonly subHeading: Locator
+  readonly errorMessage: Locator
 
   constructor(page: Page) {
     this.page = page
-    this.usernameInput = page.locator('#username')
-    this.passwordInput = page.locator('#password')
-    this.submitButton = page.getByRole('button', { name: 'ログイン' })
-    this.errorMessage = page.locator('[class*="bg-red"]')
-    this.registerLink = page.getByRole('link', { name: 'アカウント作成' })
     this.heading = page.getByRole('heading', { name: 'PromptVault' })
+    this.subHeading = page.getByText('Googleアカウントでログイン')
+    this.errorMessage = page.locator('[class*="bg-red"]')
   }
 
   async goto() {
     await this.page.goto('/login')
   }
 
-  async login(username: string, password: string) {
-    await this.usernameInput.fill(username)
-    await this.passwordInput.fill(password)
-    await this.submitButton.click()
+  /**
+   * localStorageに直接トークンを設定してログイン状態にする
+   * （Google Sign-InはE2Eテストで直接操作できないため）
+   */
+  async loginViaLocalStorage(authData: {
+    token: string
+    userId: string
+    displayName: string
+    email: string
+    pictureUrl?: string
+  }) {
+    await this.page.evaluate((data) => {
+      localStorage.setItem('token', data.token)
+      localStorage.setItem('userId', data.userId)
+      localStorage.setItem('displayName', data.displayName)
+      localStorage.setItem('email', data.email)
+      if (data.pictureUrl) {
+        localStorage.setItem('pictureUrl', data.pictureUrl)
+      }
+    }, authData)
+    await this.page.goto('/dashboard')
   }
 }

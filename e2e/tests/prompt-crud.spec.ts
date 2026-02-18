@@ -12,8 +12,8 @@ test.describe('プロンプトCRUD操作', () => {
     await expect(page.getByText(MOCK_PROMPTS[1].title)).toBeVisible()
   })
 
-  test('ユーザー名がヘッダーに表示される', async ({ authenticatedPage: page }) => {
-    await expect(page.getByText('testuser')).toBeVisible()
+  test('表示名がヘッダーに表示される', async ({ authenticatedPage: page }) => {
+    await expect(page.getByText('Test User')).toBeVisible()
   })
 
   test('新しいプロンプトを作成できる', async ({ authenticatedPage: page }) => {

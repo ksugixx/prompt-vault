@@ -1,5 +1,5 @@
 import { test as apiMockTest } from './api-mock.fixture'
-import { MOCK_LOGIN_RESPONSE } from '../helpers/mock-data'
+import { MOCK_GOOGLE_AUTH_RESPONSE } from '../helpers/mock-data'
 
 export const test = apiMockTest.extend({
   authenticatedPage: async ({ mockApi: page }, use) => {
@@ -8,8 +8,12 @@ export const test = apiMockTest.extend({
     await page.evaluate((data) => {
       localStorage.setItem('token', data.token)
       localStorage.setItem('userId', data.userId)
-      localStorage.setItem('username', data.username)
-    }, MOCK_LOGIN_RESPONSE)
+      localStorage.setItem('displayName', data.displayName)
+      localStorage.setItem('email', data.email)
+      if (data.pictureUrl) {
+        localStorage.setItem('pictureUrl', data.pictureUrl)
+      }
+    }, MOCK_GOOGLE_AUTH_RESPONSE)
     await page.goto('/dashboard')
     await use(page)
   },

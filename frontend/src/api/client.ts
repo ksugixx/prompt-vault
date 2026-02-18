@@ -6,12 +6,7 @@
 import axios from 'axios';
 import type { AxiosInstance } from 'axios';
 import type {
-  LoginRequest,
-  LoginResponse,
-  RegisterRequest,
-  RegisterResponse,
-  ChangePasswordRequest,
-  ChangePasswordResponse,
+  GoogleAuthResponse,
   PromptsResponse,
   PromptFormData,
   CreatePromptResponse,
@@ -40,7 +35,7 @@ apiClient.interceptors.request.use((config) => {
 });
 
 /** 401自動リダイレクトを除外するパス（認証エラーを自前でハンドリングするエンドポイント） */
-const AUTH_ERROR_SELF_HANDLED = ['/login', '/register', '/change-password'];
+const AUTH_ERROR_SELF_HANDLED = ['/auth/google'];
 
 /** レスポンスインターセプター: 401エラー時の自動ログアウト */
 apiClient.interceptors.response.use(
@@ -52,7 +47,9 @@ apiClient.interceptors.response.use(
       if (!isSelfHandled) {
         localStorage.removeItem('token');
         localStorage.removeItem('userId');
-        localStorage.removeItem('username');
+        localStorage.removeItem('displayName');
+        localStorage.removeItem('email');
+        localStorage.removeItem('pictureUrl');
         window.location.href = '/login';
       }
     }
@@ -62,19 +59,16 @@ apiClient.interceptors.response.use(
 
 // ===== 認証API =====
 
-/** ユーザー登録 */
-export const register = async (data: RegisterRequest): Promise<RegisterResponse> => {
-  const response = await apiClient.post<RegisterResponse>('/register', data);
-  return response.data;
-};
-
-/** ログイン */
-export const login = async (data: LoginRequest): Promise<LoginResponse> => {
-  const response = await apiClient.post<LoginResponse>('/login', data);
-  // トークンとユーザー情報をlocalStorageに保存
+/** Google認証（ログイン + 自動登録） */
+export const googleAuth = async (idToken: string): Promise<GoogleAuthResponse> => {
+  const response = await apiClient.post<GoogleAuthResponse>('/auth/google', { idToken });
   localStorage.setItem('token', response.data.token);
   localStorage.setItem('userId', response.data.userId);
-  localStorage.setItem('username', response.data.username);
+  localStorage.setItem('displayName', response.data.displayName);
+  localStorage.setItem('email', response.data.email);
+  if (response.data.pictureUrl) {
+    localStorage.setItem('pictureUrl', response.data.pictureUrl);
+  }
   return response.data;
 };
 
@@ -82,20 +76,18 @@ export const login = async (data: LoginRequest): Promise<LoginResponse> => {
 export const logout = (): void => {
   localStorage.removeItem('token');
   localStorage.removeItem('userId');
-  localStorage.removeItem('username');
-};
-
-/** パスワード変更 */
-export const changePassword = async (data: ChangePasswordRequest): Promise<ChangePasswordResponse> => {
-  const response = await apiClient.post<ChangePasswordResponse>('/change-password', data);
-  return response.data;
+  localStorage.removeItem('displayName');
+  localStorage.removeItem('email');
+  localStorage.removeItem('pictureUrl');
 };
 
 /** 認証状態の取得 */
 export const getAuthState = () => ({
   token: localStorage.getItem('token'),
   userId: localStorage.getItem('userId'),
-  username: localStorage.getItem('username'),
+  displayName: localStorage.getItem('displayName'),
+  email: localStorage.getItem('email'),
+  pictureUrl: localStorage.getItem('pictureUrl'),
   isAuthenticated: !!localStorage.getItem('token'),
 });
 

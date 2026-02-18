@@ -15,6 +15,7 @@ Claude Codeは以下のフローを必ず守ること。mainブランチへの�
 4. **ローカルテスト**: 実装後、以下を実行して確認
    - フロントエンド: `cd frontend && npm test && npm run build && npm run lint`
    - バックエンド: `cd backend && npm test && npm run build`
+   - E2Eテスト: `npx playwright test`（プロジェクトルートで実行）
 5. **コミット & push**: `git add <files> && git commit` → `git push -u origin feature/xxx`
 6. **PR作成**: `gh pr create` でプルリクエストを作成
 7. **レビュー待ち**: 人間がレビュー＆テスト → 承認 → マージ
@@ -34,7 +35,7 @@ Claude Codeは以下のフローを必ず守ること。mainブランチへの�
 
 **技術スタック:**
 - Frontend: React + TypeScript, Vite, React Router, TanStack Query, Tailwind CSS
-- Backend: Azure Functions (TypeScript), MongoDB Atlas, JWT認証
+- Backend: Azure Functions (TypeScript), MongoDB Atlas, Google OAuth + JWT認証
 - Infra: Azure Static Web Apps, GitHub Actions CI/CD
 
 ## プロジェクト構造
@@ -70,13 +71,16 @@ prompt-vault/
 ## 重要な実装ポイント
 
 ### 認証フロー
-1. ユーザーがログイン → バックエンドがJWTトークンを発行
-2. フロントエンドがトークンを `localStorage` に保存
-3. 以降のAPIリクエストで `Authorization: Bearer <token>` ヘッダーを付与
-4. バックエンドがトークンを検証 → userIdを取得 → リクエスト処理
+1. ユーザーがGoogle Sign-Inボタンをクリック → Google IDトークンを取得
+2. フロントエンドがIDトークンをバックエンド `POST /api/auth/google` に送信
+3. バックエンドが `google-auth-library` でIDトークンを検証
+4. 新規ユーザーの場合はMAX_USERSチェック後に自動登録、既存ユーザーの場合はそのままJWT発行
+5. フロントエンドがJWTトークン・ユーザー情報を `localStorage` に保存
+6. 以降のAPIリクエストで `X-Authorization: Bearer <token>` ヘッダーを付与
+7. バックエンドがJWTを検証 → userIdを取得 → リクエスト処理
 
 ### MongoDB インデックス設計
-- **users**: `{ username: 1 }` unique - ユーザー名の一意性保証・検索用
+- **users**: `{ googleId: 1 }` unique - Google IDの一意性保証・検索用
 - **prompts**: `{ userId: 1, createdAt: -1 }` - ユーザーごとの一覧取得用
 - **prompts**: `{ _id: 1, userId: 1 }` - 更新・削除の所有権チェック用
 

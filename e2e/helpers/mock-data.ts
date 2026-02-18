@@ -1,17 +1,15 @@
 export const TEST_USER = {
-  username: 'testuser',
-  password: 'Password123',
+  displayName: 'Test User',
+  email: 'test@example.com',
 }
 
-export const MOCK_LOGIN_RESPONSE = {
+export const MOCK_GOOGLE_AUTH_RESPONSE = {
   token: 'mock-jwt-token-for-testing',
   userId: 'user-001',
-  username: TEST_USER.username,
-}
-
-export const MOCK_REGISTER_RESPONSE = {
-  message: '登録が完了しました',
-  userId: 'user-001',
+  displayName: TEST_USER.displayName,
+  email: TEST_USER.email,
+  pictureUrl: 'https://example.com/photo.jpg',
+  isNewUser: false,
 }
 
 export const MOCK_PROMPTS = [
