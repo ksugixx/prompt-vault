@@ -65,9 +65,9 @@ export async function initializeDatabase(): Promise<void> {
   try {
     const db = await getDatabase();
 
-    // Users: username に一意インデックス
+    // Users: googleId に一意インデックス
     await db.collection('Users').createIndex(
-      { username: 1 },
+      { googleId: 1 },
       { unique: true }
     );
 

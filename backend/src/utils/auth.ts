@@ -15,17 +15,17 @@ const TOKEN_EXPIRY = '24h';
 /**
  * JWTトークンを生成
  * @param userId ユーザーID
- * @param username ユーザー名
+ * @param displayName 表示名
  * @returns JWTトークン
  */
-export function generateToken(userId: string, username: string): string {
+export function generateToken(userId: string, displayName: string): string {
   if (!JWT_SECRET) {
     throw new Error('JWT_SECRET is not configured');
   }
 
   const payload: AuthTokenPayload = {
     userId,
-    username,
+    displayName,
   };
 
   const token = jwt.sign(payload, JWT_SECRET, {
@@ -91,35 +91,3 @@ export function getAuthenticatedUser(request: HttpRequest): AuthTokenPayload | n
   return verifyToken(token);
 }
 
-/**
- * ユーザー名のバリデーション
- * 3-20文字、英数字とアンダースコアのみ
- * @param username ユーザー名
- * @returns 検証結果とエラーメッセージ
- */
-export function validateUsername(username: string): { valid: boolean; error?: string } {
-  if (!username) {
-    return {
-      valid: false,
-      error: 'Username is required',
-    };
-  }
-
-  if (username.length < 3 || username.length > 20) {
-    return {
-      valid: false,
-      error: 'Username must be between 3 and 20 characters',
-    };
-  }
-
-  // 英数字とアンダースコアのみ許可
-  const validPattern = /^[a-zA-Z0-9_]+$/;
-  if (!validPattern.test(username)) {
-    return {
-      valid: false,
-      error: 'Username can only contain letters, numbers, and underscores',
-    };
-  }
-
-  return { valid: true };
-}

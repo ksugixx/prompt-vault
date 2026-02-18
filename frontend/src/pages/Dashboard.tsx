@@ -6,7 +6,6 @@ import type { Prompt, PromptFilters } from '../types'
 import PromptCard from '../components/PromptCard'
 import SearchFilter from '../components/SearchFilter'
 import PromptForm from './PromptForm'
-import ChangePasswordModal from '../components/ChangePasswordModal'
 import ImportModal from '../components/ImportModal'
 import PromptDetailModal from '../components/PromptDetailModal'
 import ThemeToggle from '../components/ThemeToggle'
@@ -14,13 +13,12 @@ import ThemeToggle from '../components/ThemeToggle'
 const Dashboard = () => {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const { username } = getAuthState()
+  const { displayName } = getAuthState()
 
   const [filters, setFilters] = useState<PromptFilters>({})
   const [showForm, setShowForm] = useState(false)
   const [editPrompt, setEditPrompt] = useState<Prompt | null>(null)
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
-  const [showChangePassword, setShowChangePassword] = useState(false)
   const [showImportModal, setShowImportModal] = useState(false)
   const [selectedPrompt, setSelectedPrompt] = useState<Prompt | null>(null)
 
@@ -129,13 +127,7 @@ const Dashboard = () => {
             >
               インポート
             </button>
-            <span className="text-sm text-gray-500 dark:text-gray-400 hidden sm:inline">{username}</span>
-            <button
-              onClick={() => setShowChangePassword(true)}
-              className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-            >
-              パスワード変更
-            </button>
+            <span className="text-sm text-gray-500 dark:text-gray-400 hidden sm:inline">{displayName}</span>
             <button
               onClick={handleLogout}
               className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
@@ -224,11 +216,6 @@ const Dashboard = () => {
           onClose={() => setSelectedPrompt(null)}
           onEdit={handleEdit}
         />
-      )}
-
-      {/* パスワード変更モーダル */}
-      {showChangePassword && (
-        <ChangePasswordModal onClose={() => setShowChangePassword(false)} />
       )}
 
       {/* インポートモーダル */}

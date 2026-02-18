@@ -5,7 +5,9 @@
 /** ユーザー情報 */
 export interface User {
   id: string;
-  username: string;
+  displayName: string;
+  email: string;
+  pictureUrl?: string;
 }
 
 /** プロンプト */
@@ -34,29 +36,14 @@ export interface PromptFormData {
   isPinned?: boolean;
 }
 
-/** ログインリクエスト */
-export interface LoginRequest {
-  username: string;
-  password: string;
-}
-
-/** ログインレスポンス */
-export interface LoginResponse {
+/** Google認証レスポンス */
+export interface GoogleAuthResponse {
   token: string;
   userId: string;
-  username: string;
-}
-
-/** 登録リクエスト */
-export interface RegisterRequest {
-  username: string;
-  password: string;
-}
-
-/** 登録レスポンス */
-export interface RegisterResponse {
-  message: string;
-  userId: string;
+  displayName: string;
+  email: string;
+  pictureUrl?: string;
+  isNewUser: boolean;
 }
 
 /** プロンプト一覧レスポンス */
@@ -67,18 +54,6 @@ export interface PromptsResponse {
 /** プロンプト作成レスポンス */
 export interface CreatePromptResponse {
   id: string;
-  message: string;
-}
-
-/** パスワード変更リクエスト */
-export interface ChangePasswordRequest {
-  currentPassword: string;
-  newPassword: string;
-  confirmPassword: string;
-}
-
-/** パスワード変更レスポンス */
-export interface ChangePasswordResponse {
   message: string;
 }
 
@@ -101,7 +76,9 @@ export interface PromptFilters {
 export interface AuthState {
   token: string | null;
   userId: string | null;
-  username: string | null;
+  displayName: string | null;
+  email: string | null;
+  pictureUrl: string | null;
   isAuthenticated: boolean;
 }
 

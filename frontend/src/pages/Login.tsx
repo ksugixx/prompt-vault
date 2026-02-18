@@ -1,33 +1,91 @@
-import { useState, type FormEvent } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
-import { login } from '../api/client'
+import { useState, useEffect, useRef, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { googleAuth } from '../api/client'
+
+declare global {
+  interface Window {
+    google?: {
+      accounts: {
+        id: {
+          initialize: (config: {
+            client_id: string;
+            callback: (response: { credential: string }) => void;
+          }) => void;
+          renderButton: (element: HTMLElement, config: {
+            theme: string;
+            size: string;
+            width: string;
+            text: string;
+            locale: string;
+          }) => void;
+        };
+      };
+    };
+  }
+}
 
 const Login = () => {
   const navigate = useNavigate()
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const buttonRef = useRef<HTMLDivElement>(null)
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault()
+  const handleGoogleResponse = useCallback(async (response: { credential: string }) => {
     setError('')
     setLoading(true)
-
     try {
-      await login({ username, password })
+      await googleAuth(response.credential)
       navigate('/dashboard')
     } catch (err: unknown) {
       if (err && typeof err === 'object' && 'response' in err) {
-        const axiosErr = err as { response?: { data?: { error?: string } } }
-        setError(axiosErr.response?.data?.error || 'ログインに失敗しました')
+        const axiosErr = err as { response?: { status?: number; data?: { error?: string } } }
+        if (axiosErr.response?.status === 403) {
+          setError('ユーザー登録の上限に達しています。管理者にお問い合わせください。')
+        } else {
+          setError(axiosErr.response?.data?.error || '認証に失敗しました')
+        }
       } else {
         setError('サーバーに接続できません')
       }
     } finally {
       setLoading(false)
     }
-  }
+  }, [navigate])
+
+  useEffect(() => {
+    const initializeGoogle = () => {
+      if (!window.google) return
+
+      window.google.accounts.id.initialize({
+        client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+        callback: handleGoogleResponse,
+      })
+
+      if (buttonRef.current) {
+        window.google.accounts.id.renderButton(buttonRef.current, {
+          theme: 'outline',
+          size: 'large',
+          width: '300',
+          text: 'signin_with',
+          locale: 'ja',
+        })
+      }
+    }
+
+    // Google SDKが既にロード済みならすぐ初期化
+    if (window.google) {
+      initializeGoogle()
+    } else {
+      // SDKのロードを待つ
+      const interval = setInterval(() => {
+        if (window.google) {
+          clearInterval(interval)
+          initializeGoogle()
+        }
+      }, 100)
+      return () => clearInterval(interval)
+    }
+  }, [handleGoogleResponse])
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
@@ -36,7 +94,7 @@ const Login = () => {
           {/* ヘッダー */}
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">PromptVault</h1>
-            <p className="text-gray-500 dark:text-gray-400 mt-2">プロンプト管理にログイン</p>
+            <p className="text-gray-500 dark:text-gray-400 mt-2">Googleアカウントでログイン</p>
           </div>
 
           {/* エラーメッセージ */}
@@ -46,54 +104,18 @@ const Login = () => {
             </div>
           )}
 
-          {/* フォーム */}
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label htmlFor="username" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                ユーザー名
-              </label>
-              <input
-                id="username"
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-                className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-white dark:bg-gray-700 dark:text-gray-100"
-                placeholder="ユーザー名を入力"
-              />
+          {/* ローディング */}
+          {loading && (
+            <div className="text-center mb-4">
+              <div className="inline-block w-6 h-6 border-2 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">認証中...</p>
             </div>
+          )}
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                パスワード
-              </label>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-white dark:bg-gray-700 dark:text-gray-100"
-                placeholder="パスワードを入力"
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? 'ログイン中...' : 'ログイン'}
-            </button>
-          </form>
-
-          {/* 登録リンク */}
-          <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-6">
-            アカウントをお持ちでないですか？{' '}
-            <Link to="/register" className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium">
-              アカウント作成
-            </Link>
-          </p>
+          {/* Google Sign-In ボタン */}
+          <div className="flex justify-center">
+            <div ref={buttonRef} />
+          </div>
         </div>
       </div>
     </div>

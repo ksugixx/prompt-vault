@@ -62,8 +62,8 @@ feat: ユーザー登録APIの実装
 
 ## セキュリティ
 
-- **パスワードは平文で保存しない** - 必ず bcrypt でハッシュ化
-- **JWT_SECRET は環境変数で管理** - ハードコードしない
+- **Google IDトークンはバックエンドで必ず検証する** - `google-auth-library` を使用
+- **JWT_SECRET, GOOGLE_CLIENT_ID は環境変数で管理** - ハードコードしない
 - **本番環境では HTTPS を使用**
 - **入力値の検証を徹底** - SQLインジェクション、XSS対策
 
