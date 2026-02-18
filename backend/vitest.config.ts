@@ -5,6 +5,7 @@ export default defineConfig({
     globals: true,
     environment: 'node',
     include: ['src/**/*.test.ts'],
+    reporters: ['default', ['allure-vitest/reporter', { resultsDir: '../allure-results' }]],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'lcov'],
