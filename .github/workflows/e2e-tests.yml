@@ -1,0 +1,90 @@
+name: E2E Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Java (for Allure CLI)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'microsoft'
+          java-version: '21'
+
+      - name: Install frontend dependencies
+        run: cd frontend && npm ci
+
+      - name: Install backend dependencies
+        run: cd backend && npm ci
+
+      - name: Install E2E dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run backend unit tests
+        if: always()
+        run: cd backend && npm test
+
+      - name: Run frontend unit tests
+        if: always()
+        run: cd frontend && npm test
+
+      - name: Run E2E tests
+        if: always()
+        run: npm run e2e
+
+      - name: Get Allure history from gh-pages
+        if: always()
+        run: |
+          git fetch origin gh-pages --depth=1 || true
+          if git rev-parse --verify origin/gh-pages > /dev/null 2>&1; then
+            git checkout origin/gh-pages -- allure-report/history || true
+            if [ -d allure-report/history ]; then
+              cp -r allure-report/history allure-results/history
+            fi
+          fi
+
+      - name: Generate Allure Report
+        if: always()
+        run: npx allure generate allure-results --clean -o allure-report
+
+      - name: Deploy to GitHub Pages
+        if: always() && github.ref == 'refs/heads/main'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./allure-report
+          publish_branch: gh-pages
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
+
+      - name: Upload test artifacts (screenshots, videos, traces)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-artifacts
+          path: test-results/
+          retention-days: 7
