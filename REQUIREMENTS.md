@@ -1,4 +1,4 @@
-﻿# PromptVault - 要求仕様書
+# PromptVault - 要求仕様書
 
 ## プロジェクト概要
 個人用のプロンプト管理Webアプリケーション。
@@ -9,24 +9,27 @@ AIツール別にプロンプトを整理・保存・検索できる。
 - カテゴリやタグで分類して効率的に検索
 - 個人用として使いやすいシンプルなUI
 
-## MVP（最小機能）スコープ
+## 実装済みスコープ
 
 ### 認証機能
-- ユーザー登録（ID/Passwordのみ）
-- ログイン/ログアウト
-- JWT認証
-- 将来的に複数ユーザー対応を想定
+- Google OAuth認証（Google Sign-In）
+- 初回ログイン時に自動ユーザー登録
+- MAX_USERS環境変数による登録ユーザー数制限
+- JWT認証によるセッション管理
+- ログアウト機能
 
 ### プロンプト管理機能
 - プロンプトの作成
-  - タイトル（必須）
-  - 本文（必須、マークダウン対応）
+  - タイトル（必須、1-200文字）
+  - 本文（必須、マークダウン対応、最大10,000文字）
+  - 説明（任意、最大200文字、カード表示用）
   - カテゴリ（必須、ドロップダウン選択）
-  - タグ（任意、複数選択可能）
+  - タグ（任意、複数選択可能、最大10個）
   - AIツール（任意：Claude, ChatGPT, Gemini, Other）
 - プロンプトの編集
 - プロンプトの削除
-- プロンプト一覧表示（作成日時順）
+- プロンプト一覧表示（ソート対応）
+- プロンプトのピン留め
 
 ### 検索・フィルタリング機能
 - タイトル・本文での全文検索
@@ -34,61 +37,82 @@ AIツール別にプロンプトを整理・保存・検索できる。
 - タグフィルタ
 - AIツールフィルタ
 - 複数フィルタの組み合わせ
+- ソート機能（作成日時/更新日時/タイトル、昇順/降順）
+
+### インポート/エクスポート機能
+- JSON形式でのプロンプト一括エクスポート（ファイルダウンロード）
+- JSON形式でのプロンプト一括インポート（最大100件）
+
+### ダークモード
+- ライト/ダークテーマの切り替え（Tailwind CSS `dark:` クラス活用）
 
 ## 技術スタック
 
 ### Frontend
-- React 18+ with TypeScript
-- Vite (ビルドツール)
-- React Router v6 (ルーティング)
-- TanStack Query / React Query (データフェッチング・状態管理)
-- Tailwind CSS (スタイリング)
-- Axios (HTTP クライアント)
+- React 19 + TypeScript
+- Vite 7（ビルドツール）
+- React Router v7（ルーティング）
+- TanStack Query v5（データフェッチング・状態管理）
+- Tailwind CSS v4（スタイリング）
+- Axios（HTTPクライアント）
+- react-markdown（マークダウンレンダリング）
 
 ### Backend
-- Azure Functions (TypeScript)
+- Azure Functions v4（TypeScript）
 - Node.js 18+
-- JWT認証
-- bcryptjs（パスワードハッシュ化）
-- MongoDB（データベース）
+- google-auth-library（Google IDトークン検証）
+- jsonwebtoken（JWT認証）
+- MongoDB Driver v6
 
 ### Database
-- MongoDB (Atlas/ローカル)
+- MongoDB Atlas
 - コレクション構成：
-  - **users**
-  - **prompts**
+  - **users** - ユーザー情報
+  - **prompts** - プロンプトデータ
+
+### テスト
+- Vitest（ユニットテスト、フロントエンド・バックエンド共通）
+- Playwright（E2Eテスト、Chromium）
+- Allure（テストレポート生成）
+- Testing Library（コンポーネントテスト）
 
 ## Infrastructure & DevOps
-- Azure Static Web Apps（Frontend ホスティング）
+- Azure Static Web Apps（Frontend ホスティング + API プロキシ）
 - Azure Functions（Backend API）
 - MongoDB Atlas（本番DB）
 - GitHub（ソースコード管理）
 - GitHub Actions（CI/CD）
+  - ビルド・テスト・デプロイパイプライン
+  - E2Eテスト + Allureレポート（GitHub Pages）
 
 ## データモデル
 
 ### User
 ```typescript
 {
-  _id: ObjectId;        // MongoDB ObjectId
-  username: string;     // ユニーク、3-20文字
-  passwordHash: string; // bcryptでハッシュ化
-  createdAt: string;    // ISO 8601形式
+  id: string;              // UUID v4
+  googleId: string;        // Google IDトークンの sub claim（ユニーク）
+  email: string;           // Googleアカウントのメールアドレス
+  displayName: string;     // Googleプロフィール名
+  pictureUrl?: string;     // Googleプロフィール画像URL
+  createdAt: string;       // ISO 8601形式
 }
 ```
 
 ### Prompt
 ```typescript
 {
-  _id: ObjectId;        // MongoDB ObjectId
-  userId: ObjectId;     // 所有者のUser ID
-  title: string;        // 1-200文字
-  content: string;      // マークダウン対応、最大10,000文字
-  category: string;     // 例: "コーディング", "ライティング", "分析", "翻訳", "その他"
-  tags: string[];       // 例: ["Python", "デバッグ"], 最大10個
-  aiTool?: string;      // 例: "Claude", "ChatGPT", "Gemini", "Other" (任意)
-  createdAt: string;    // ISO 8601形式
-  updatedAt: string;    // ISO 8601形式
+  id: string;              // UUID v4
+  userId: string;          // 所有者のUser ID
+  title: string;           // 1-200文字
+  content: string;         // マークダウン対応、最大10,000文字
+  description?: string;    // 最大200文字（カード表示用）
+  category: string;        // 例: "コーディング", "ライティング", "分析", "翻訳", "その他"
+  tags: string[];          // 例: ["Python", "デバッグ"], 最大10個
+  aiTool?: string;         // "Claude" | "ChatGPT" | "Gemini" | "Other"（任意）
+  isPinned?: boolean;      // ピン留め状態
+  createdAt: string;       // ISO 8601形式
+  updatedAt: string;       // ISO 8601形式
 }
 ```
 
@@ -96,40 +120,13 @@ AIツール別にプロンプトを整理・保存・検索できる。
 
 ### 認証エンドポイント
 
-#### POST /api/register
-ユーザー登録
+#### POST /api/auth/google
+Google OAuth認証（自動登録）
 
 **リクエスト:**
 ```json
 {
-  "username": "user123",
-  "password": "securePassword123"
-}
-```
-
-**レスポンス（成功 201）:**
-```json
-{
-  "message": "User registered successfully",
-  "userId": "mongo-objectid-here"
-}
-```
-
-**エラー（400）:**
-```json
-{
-  "error": "Username already exists"
-}
-```
-
-#### POST /api/login
-ログイン
-
-**リクエスト:**
-```json
-{
-  "username": "user123",
-  "password": "securePassword123"
+  "idToken": "google-id-token-here"
 }
 ```
 
@@ -137,19 +134,33 @@ AIツール別にプロンプトを整理・保存・検索できる。
 ```json
 {
   "token": "jwt-token-here",
-  "userId": "mongo-objectid-here",
-  "username": "user123"
+  "userId": "uuid-v4-here",
+  "displayName": "ユーザー名",
+  "email": "user@example.com",
+  "pictureUrl": "https://..."
 }
 ```
 
 **エラー（401）:**
 ```json
 {
-  "error": "Invalid credentials"
+  "error": "Invalid Google ID token"
+}
+```
+
+**エラー（403）:**
+```json
+{
+  "error": "Maximum number of users reached"
 }
 ```
 
 ### プロンプト管理エンドポイント（要JWT認証）
+
+認証ヘッダー:
+```
+X-Authorization: Bearer <jwt-token>
+```
 
 #### GET /api/prompts
 プロンプト一覧取得
@@ -159,24 +170,23 @@ AIツール別にプロンプトを整理・保存・検索できる。
 - `category`: カテゴリフィルタ（任意）
 - `tag`: タグフィルタ（任意）
 - `aiTool`: AIツールフィルタ（任意）
-
-**リクエストヘッダー:**
-```
-Authorization: Bearer <jwt-token>
-```
+- `sortBy`: ソートキー - `createdAt` | `updatedAt` | `title`（任意、デフォルト: `createdAt`）
+- `sortOrder`: ソート順 - `asc` | `desc`（任意、デフォルト: `desc`）
 
 **レスポンス（200）:**
 ```json
 {
   "prompts": [
     {
-      "_id": "mongo-objectid",
-      "userId": "user-objectid",
+      "id": "uuid-v4",
+      "userId": "user-uuid",
       "title": "Python デバッグ用プロンプト",
       "content": "# デバッグ手順...",
+      "description": "Pythonのデバッグに便利なプロンプト",
       "category": "コーディング",
       "tags": ["Python", "デバッグ"],
       "aiTool": "Claude",
+      "isPinned": false,
       "createdAt": "2026-02-11T00:00:00Z",
       "updatedAt": "2026-02-11T00:00:00Z"
     }
@@ -187,16 +197,12 @@ Authorization: Bearer <jwt-token>
 #### POST /api/prompts
 プロンプト作成
 
-**リクエストヘッダー:**
-```
-Authorization: Bearer <jwt-token>
-```
-
 **リクエスト:**
 ```json
 {
   "title": "新しいプロンプト",
   "content": "プロンプトの内容...",
+  "description": "カード表示用の説明",
   "category": "ライティング",
   "tags": ["ブログ", "SEO"],
   "aiTool": "ChatGPT"
@@ -206,7 +212,7 @@ Authorization: Bearer <jwt-token>
 **レスポンス（201）:**
 ```json
 {
-  "id": "new-mongo-objectid",
+  "id": "new-uuid-v4",
   "message": "Prompt created successfully"
 }
 ```
@@ -214,19 +220,16 @@ Authorization: Bearer <jwt-token>
 #### PUT /api/prompts/{id}
 プロンプト更新
 
-**リクエストヘッダー:**
-```
-Authorization: Bearer <jwt-token>
-```
-
 **リクエスト:**
 ```json
 {
   "title": "更新されたタイトル",
   "content": "更新された内容...",
+  "description": "更新された説明",
   "category": "分析",
   "tags": ["データ分析"],
-  "aiTool": "Claude"
+  "aiTool": "Claude",
+  "isPinned": true
 }
 ```
 
@@ -247,15 +250,36 @@ Authorization: Bearer <jwt-token>
 #### DELETE /api/prompts/{id}
 プロンプト削除
 
-**リクエストヘッダー:**
-```
-Authorization: Bearer <jwt-token>
-```
-
 **レスポンス（200）:**
 ```json
 {
   "message": "Prompt deleted successfully"
+}
+```
+
+#### POST /api/prompts/import
+プロンプト一括インポート
+
+**リクエスト:**
+```json
+{
+  "prompts": [
+    {
+      "title": "インポートするプロンプト",
+      "content": "内容...",
+      "category": "コーディング",
+      "tags": ["Python"],
+      "aiTool": "Claude"
+    }
+  ]
+}
+```
+
+**レスポンス（201）:**
+```json
+{
+  "message": "Prompts imported successfully",
+  "count": 1
 }
 ```
 
@@ -265,50 +289,54 @@ Authorization: Bearer <jwt-token>
 - モダンでシンプル
 - 直感的な操作性
 - レスポンシブ対応（デスクトップ・タブレット・モバイル）
-- ダークモード対応は後回し（将来的に対応）
+- ダークモード対応（実装済み）
 
 ### ページ構成
 
 #### 1. ログインページ (/login)
-- ユーザー名入力フィールド
-- パスワード入力フィールド
-- ログインボタン
-- 「アカウント作成」へのリンク
+- Google Sign-Inボタン
+- アプリ説明テキスト
 
-#### 2. ユーザー登録ページ (/register)
-- ユーザー名入力フィールド（バリデーション表示）
-- パスワード入力フィールド（強度表示）
-- 登録ボタン
-- 「ログインへ戻る」リンク
-
-#### 3. ダッシュボード (/dashboard)
+#### 2. ダッシュボード (/dashboard)
 - ヘッダー
   - アプリ名
+  - ダークモード切り替えボタン
+  - ユーザー情報表示（Googleプロフィール画像・名前）
   - ログアウトボタン
-  - ユーザー名表示
 - 検索バー
 - フィルタUI
   - カテゴリドロップダウン
   - タグ選択（マルチセレクト）
   - AIツール選択
+  - ソート設定
   - フィルタクリアボタン
 - プロンプト一覧（カードレイアウト）
   - タイトル
+  - 説明テキスト
   - カテゴリバッジ
   - タグバッジ
   - 作成日時
+  - ピン留めボタン
   - 編集・削除ボタン
   - コピーボタン
-- 新規作成ボタン（フローティングボタン）
+- 新規作成ボタン
+- インポート/エクスポートボタン
 
-#### 4. プロンプト作成/編集ページ (/prompts/new, /prompts/:id/edit)
+#### 3. プロンプト作成/編集（モーダル）
 - タイトル入力
-- 本文入力（マークダウンエディタ、プレビュー機能）
+- 説明入力
+- 本文入力（マークダウンエディタ）
 - カテゴリ選択（ドロップダウン）
 - タグ入力（入力補完、既存タグ提案）
 - AIツール選択（任意）
 - 保存ボタン
 - キャンセルボタン
+
+#### 4. プロンプト詳細（モーダル）
+- マークダウンレンダリングされた本文表示
+- メタ情報（カテゴリ・タグ・AIツール・作成日時）
+- コピーボタン
+- 編集ボタン
 
 ### インタラクション
 - プロンプトカードをクリック → 詳細モーダル表示
@@ -323,64 +351,30 @@ Authorization: Bearer <jwt-token>
 - API レスポンス時間: 500ms以内
 
 ### セキュリティ
-- パスワードはbcryptでハッシュ化（ソルトラウンド: 10）
+- Google IDトークンはバックエンドで `google-auth-library` を使用して検証
 - JWT有効期限: 24時間
 - HTTPS通信（本番環境）
 - CORS設定（本番環境では特定ドメインのみ許可）
+- JWT_SECRET, GOOGLE_CLIENT_ID は環境変数で管理
+- X-Content-Type-Options: nosniff, X-Frame-Options: DENY ヘッダー設定
 
 ### 可用性
 - ローカル開発環境で動作すること
 - Azureへのデプロイが可能なこと
 - GitHub Actionsで自動デプロイできること
 
-## 制約事項・除外項目
+## 将来的な拡張候補
 
-### MVPでは以下は対象外：
 - プロンプトの公開共有機能
 - プロンプトのバージョン履歴
 - チーム機能・コラボレーション
 - 高度な検索（正規表現、全文検索エンジン）
-- プロンプトのインポート/エクスポート（CSV/JSON）
 - AIツールへの直接実行機能
 - プロンプトのお気に入り/スター機能
 - プロンプトのフォルダ階層管理
-- ダークモード
-
-### 将来的な拡張候補：
-- 上記除外項目の段階的実装
 - プロンプトテンプレート機能（変数置換）
 - プロンプト実行履歴
 - AIツールごとの最適化提案
-
-## 開発フロー
-
-### Phase 1: バックエンド実装
-1. 型定義（models/types.ts）
-2. MongoDB接続（utils/mongodb.ts）
-3. 認証ユーティリティ（utils/auth.ts, utils/password.ts）
-4. 認証API（Register, Login）
-5. プロンプトCRUD API（GetPrompts, CreatePrompt, UpdatePrompt, DeletePrompt）
-6. ローカルテスト（func start）
-
-### Phase 2: フロントエンド実装
-1. API クライアント（api/client.ts）
-2. 認証ページ（Login, Register）
-3. プロンプト一覧ページ（Dashboard）
-4. プロンプト作成/編集ページ（PromptForm）
-5. 共通コンポーネント（PromptCard, Header, Filterなど）
-6. ルーティング設定（App.tsx）
-7. ローカルテスト（npm run dev）
-
-### Phase 3: 統合テスト
-1. フロントエンド + バックエンド連携確認
-2. エンドツーエンドテスト
-
-### Phase 4: デプロイ
-1. Azure Static Web Apps設定
-2. Azure Functions設定
-3. 環境変数設定
-4. GitHub Actions CI/CD設定
-5. 本番デプロイ
 
 ## 開発環境
 
@@ -389,9 +383,9 @@ Authorization: Bearer <jwt-token>
 - npm
 - Git
 - Azure CLI
-- Azure Functions Core Tools
-- MongoDB（ローカル or Atlas）
-- Claude Code
+- Azure Functions Core Tools v4
+- MongoDB Atlas アカウント
+- Google Cloud Console プロジェクト（OAuth クライアントID）
 
 ### 推奨エディタ
 - VS Code
