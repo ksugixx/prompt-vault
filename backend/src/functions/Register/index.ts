@@ -10,7 +10,7 @@ import { hashPassword, validatePasswordStrength } from '../../utils/password';
 import { validateUsername } from '../../utils/auth';
 import { RegisterRequest, User } from '../../models/types';
 
-async function register(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
+export async function register(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
   context.log('Register function processed a request.');
 
   try {
@@ -37,6 +37,16 @@ async function register(request: HttpRequest, context: InvocationContext): Promi
     }
 
     const collection = await getUsersCollection();
+
+    // 登録ユーザー数の上限チェック
+    const maxUsers = parseInt(process.env.MAX_USERS || '3', 10);
+    const currentUserCount = await collection.countDocuments();
+    if (currentUserCount >= maxUsers) {
+      return {
+        status: 403,
+        jsonBody: { error: 'User registration limit reached' },
+      };
+    }
 
     // ユーザー名の重複チェック
     const existingUser = await collection.findOne({ username });
