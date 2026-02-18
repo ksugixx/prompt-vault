@@ -1,0 +1,18 @@
+{
+  "name": "prompt-vault-e2e",
+  "private": true,
+  "scripts": {
+    "e2e": "playwright test",
+    "e2e:headed": "playwright test --headed",
+    "e2e:ui": "playwright test --ui",
+    "e2e:debug": "playwright test --debug",
+    "e2e:pw-report": "playwright show-report",
+    "e2e:report": "allure generate allure-results --clean -o allure-report && allure open allure-report",
+    "e2e:allure-serve": "allure serve allure-results"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.50.0",
+    "allure-playwright": "^3.0.0",
+    "allure-commandline": "^2.30.0"
+  }
+}
