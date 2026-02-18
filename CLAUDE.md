@@ -15,6 +15,7 @@ Claude Codeは以下のフローを必ず守ること。mainブランチへの�
 4. **ローカルテスト**: 実装後、以下を実行して確認
    - フロントエンド: `cd frontend && npm test && npm run build && npm run lint`
    - バックエンド: `cd backend && npm test && npm run build`
+   - E2Eテスト: `npx playwright test`（プロジェクトルートで実行）
 5. **コミット & push**: `git add <files> && git commit` → `git push -u origin feature/xxx`
 6. **PR作成**: `gh pr create` でプルリクエストを作成
 7. **レビュー待ち**: 人間がレビュー＆テスト → 承認 → マージ
